@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One Wolf, Two Wolves</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: rule cards, then sort baskets, spot-the-word cards and typing; each ending keeps one colour (s blue, es violet, ies yellow, ves red) */
+:root{
+  --bg:#f3f7ff; --paper:#ffffff; --ink:#1d2a44; --muted:#5b6886; --line:#d7e2f4; --on:#ffffff;
+  --can:#1f9a55; --can-soft:#dcf5e5; --cant:#e2485a; --cant-soft:#ffe4e7;
+  --blue:#2f74e8; --blue-soft:#e2edff; --violet:#8b5cf6; --violet-soft:#eee7ff;
+  --sun:#e2a400; --sun-soft:#fff3cf; --teal:#0e8f9c; --teal-soft:#d9f3f5;
+  --display:"Rubik","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111a2e; --paper:#1a2540; --ink:#eef3ff; --muted:#a6b3d3; --line:#2c3b5f; --on:#0f1a2e;
+  --can:#4fd486; --can-soft:#173d2a; --cant:#ff7b8a; --cant-soft:#4a1f27;
+  --blue:#6aa5ff; --blue-soft:#1f3260; --violet:#ad8cff; --violet-soft:#2f2652;
+  --sun:#ffd258; --sun-soft:#3b3118; --teal:#4fd0dc; --teal-soft:#12383d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111a2e; --paper:#1a2540; --ink:#eef3ff; --muted:#a6b3d3; --line:#2c3b5f; --on:#0f1a2e;
+  --can:#4fd486; --can-soft:#173d2a; --cant:#ff7b8a; --cant-soft:#4a1f27;
+  --blue:#6aa5ff; --blue-soft:#1f3260; --violet:#ad8cff; --violet-soft:#2f2652;
+  --sun:#ffd258; --sun-soft:#3b3118; --teal:#4fd0dc; --teal-soft:#12383d; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:600;font-size:18px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(34px,7vw,52px)} h2{font-size:clamp(22px,4.4vw,30px)} h3{font-size:19px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.sub{color:var(--muted);margin:0}
+.c{color:var(--can);font-weight:800}.n{color:var(--cant);font-weight:800}
+.head{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.head .big{font-size:50px;line-height:1}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stars{display:inline-flex;gap:8px;align-items:center;background:var(--sun-soft);border:2px solid var(--sun);border-radius:99px;padding:6px 16px;font-family:var(--display);font-weight:800;font-size:20px}
+.ghost{background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:6px 14px;font-weight:700;font-size:15px}
+
+section.st{background:var(--paper);border:3px solid var(--cs);border-radius:24px;padding:22px clamp(14px,3vw,28px) 24px;display:flex;flex-direction:column;gap:16px}
+.st-head{display:flex;gap:14px;align-items:center}
+.num{width:46px;height:46px;border-radius:15px;background:var(--cc);color:var(--on);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:23px;flex:none}
+.st-head .t{min-width:0}.st-head p{margin:2px 0 0;color:var(--muted);font-size:16px}
+.s1{--cc:var(--blue);--cs:var(--blue-soft)}.s2{--cc:var(--can);--cs:var(--can-soft)}.s3{--cc:var(--cant);--cs:var(--cant-soft)}
+.s4{--cc:var(--violet);--cs:var(--violet-soft)}.s5{--cc:var(--sun);--cs:var(--sun-soft)}.s6{--cc:var(--teal);--cs:var(--teal-soft)}
+
+/* verb cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.card{position:relative;height:130px;border:none;background:none;padding:0;perspective:700px}
+.card .in{position:absolute;inset:0;display:block;transition:transform .45s;transform-style:preserve-3d}
+.card.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--line);background:var(--bg)}
+.face.back{transform:rotateY(180deg);background:var(--cs);border-color:var(--cc)}
+.face .em{font-size:48px;line-height:1}
+.face .en{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.15}
+.face .ru{font-size:15px;color:var(--muted)}
+.face .tap{font-size:13px;color:var(--muted)}
+
+/* rule */
+.rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.rbox{background:var(--bg);border-radius:16px;padding:12px 16px;display:flex;flex-direction:column;gap:4px;border-top:5px solid var(--rc)}
+.rbox .lab{font-size:15px;color:var(--muted)}
+.rbox .ex{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.35}
+.rbox .ru{font-size:15px;color:var(--muted)}
+.tip{background:var(--sun-soft);border-radius:14px;padding:10px 14px;font-size:17px}
+.tip s{color:var(--cant);text-decoration-thickness:2px}
+
+/* quiz rows */
+.quiz{display:flex;flex-direction:column;gap:10px}
+.qr{display:grid;grid-template-columns:56px 1fr;gap:6px 14px;align-items:center;padding:10px 14px;border-radius:16px;background:var(--bg);border:2px solid transparent}
+.qr.ok{border-color:var(--can);background:var(--can-soft)}
+.qr .pic{font-size:40px;line-height:1;text-align:center}
+.qr .body{min-width:0;display:flex;flex-direction:column;gap:8px}
+.qr .q{font-family:var(--display);font-weight:700;font-size:21px}
+.gap{display:inline-block;min-width:64px;border-bottom:3px solid var(--cc);text-align:center;color:var(--cc);padding:0 6px}
+.ok .gap{border-color:var(--can);color:var(--can);font-weight:800}
+.opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.opt{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:5px 15px;font-weight:800;font-size:19px;font-family:var(--display);text-align:left}
+.opt:hover{border-color:var(--cc)}
+.opt.bad{border-color:var(--cant);background:var(--cant-soft);animation:shake .35s}
+.opt.good{border-color:var(--can);background:var(--can);color:var(--on)}
+.ok .opt:not(.good){opacity:.35}
+.hb{border:none;background:none;color:var(--muted);font-size:15px;text-decoration:underline dotted;padding:4px}
+.qh{font-size:16px;background:var(--sun-soft);border-radius:10px;padding:6px 10px}
+.score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-family:var(--display);font-weight:800}
+.bar{flex:1;min-width:120px;height:14px;border-radius:99px;background:var(--bg);border:2px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--cc);transition:width .3s}
+.res{color:var(--can);font-family:var(--display);font-weight:800}
+
+/* word order */
+.wo{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:16px;background:var(--bg);border:2px solid transparent}
+.wo.ok{border-color:var(--can);background:var(--can-soft)}
+.wo .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.wo .ru{font-size:16px;color:var(--muted)}
+.line{min-height:52px;border-bottom:3px dashed var(--cc);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 0}
+.line.bad{animation:shake .35s;border-color:var(--cant)}
+.ok .line{border-bottom-style:solid;border-color:var(--can)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
+.chip{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:5px 14px;font-weight:800;font-size:20px;font-family:var(--display)}
+.chip.k-can{color:var(--can)}.chip.k-cant{color:var(--cant)}
+.ok .chip{cursor:default}
+
+/* riddles */
+.rid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.rcard{background:var(--bg);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid transparent}
+.rcard.ok{border-color:var(--can);background:var(--can-soft)}
+.rcard .txt{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.45}
+.rcard .who{font-family:var(--display);font-weight:800;color:var(--cc)}
+.rcard .opts .opt{font-size:34px;padding:2px 12px;line-height:1.2}
+.rcard .ans{font-family:var(--display);font-weight:800;color:var(--can);font-size:20px}
+
+/* about me */
+.me{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.mi{background:var(--bg);border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mi .em{font-size:32px;line-height:1}
+.mi .w{font-family:var(--display);font-weight:800;font-size:18px;flex:1;min-width:110px}
+.mi .yn{display:flex;gap:6px}
+.mi .yn button{border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:3px 10px;font-weight:800;font-size:16px}
+.mi .yn .y[aria-pressed="true"]{background:var(--can);border-color:var(--can);color:var(--on)}
+.mi .yn .x[aria-pressed="true"]{background:var(--cant);border-color:var(--cant);color:var(--on)}
+.story{background:var(--sun-soft);border-radius:18px;padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.story .s{font-family:var(--display);font-weight:700;font-size:21px}
+.story .empty{color:var(--muted)}
+.ask{background:var(--bg);border-radius:16px;padding:12px 16px;font-size:17px}
+.ask b{font-family:var(--display)}
+
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.rc{background:var(--bg);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-top:6px solid var(--rc)}
+.rc .tag{font-family:var(--display);font-weight:800;font-size:30px;color:var(--rc);line-height:1}
+.rc .w{font-family:var(--display);font-weight:700;font-size:21px}
+.rc .w b,.rc .ex b{color:var(--rc)}
+.rc .ru{font-size:16px}
+.rc .ex{font-size:17px;font-family:var(--display);font-weight:700}
+.rc small{font-family:var(--body);font-weight:600;color:var(--muted);font-size:14px}
+.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;background:var(--bg);border-radius:18px;padding:12px;min-height:64px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:3px solid var(--line);background:var(--paper);border-radius:14px;padding:4px 12px;font-family:var(--display);font-weight:700;font-size:20px}
+.chip .e{font-size:24px}
+.chip.sel{border-color:var(--cc);box-shadow:0 0 0 4px var(--cs);transform:translateY(-2px)}
+.chip.placed{pointer-events:none;font-size:18px;padding:2px 8px}
+.chip.placed b{color:var(--kc)}
+.baskets{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.basket{border:3px dashed var(--kc);background:var(--ks);border-radius:20px;min-height:150px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.basket .h{font-family:var(--display);font-weight:800;font-size:30px;color:var(--kc)}
+.basket .in{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.basket .hint{font-size:15px;background:var(--paper);border-radius:10px;padding:4px 8px;text-align:center}
+.basket.bad{animation:shake .35s}
+.k-s{--kc:var(--blue);--ks:var(--blue-soft)}.k-es{--kc:var(--violet);--ks:var(--violet-soft)}.k-ies{--kc:var(--sun);--ks:var(--sun-soft)}.k-ves{--kc:var(--cant);--ks:var(--cant-soft)}
+.done{font-family:var(--display);font-weight:800;font-size:22px;color:var(--can)}
+.spot{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.sc{background:var(--bg);border-radius:18px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;border:3px solid transparent;text-align:center}
+.sc.ok{border-color:var(--can);background:var(--can-soft)}
+.sc .e{font-size:44px;line-height:1}
+.sc .o{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.sc .opt.wrong{text-decoration:line-through;opacity:.5}
+.sc.ok .opt:not(.good){display:none}
+.sc .h{font-size:15px;background:var(--sun-soft);border-radius:10px;padding:4px 8px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:10px}
+.tr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--bg);border-radius:16px;padding:10px 12px;border:2px solid transparent}
+.tr.ok{border-color:var(--can);background:var(--can-soft)}
+.tr .e{font-size:30px}
+.tr .w{font-family:var(--display);font-weight:700;font-size:19px}
+.tr input{font-family:var(--display);font-weight:700;font-size:20px;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:3px 10px;width:150px}
+.tr input.bad{border-color:var(--cant);background:var(--cant-soft);animation:shake .35s}
+.tr.ok input{border-color:var(--can);color:var(--can)}
+.tr .go{background:var(--cc);color:var(--on);border:none;border-radius:12px;padding:6px 14px;font-weight:800}
+.tr.ok .go{display:none}
+.tr .h{width:100%;font-size:15px;background:var(--sun-soft);border-radius:10px;padding:4px 8px}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes pop{50%{transform:scale(1.12)}}.pop{animation:pop .3s}
+@media (max-width:520px){.qr{grid-template-columns:44px 1fr;padding:10px}.qr .pic{font-size:32px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="head">
+    <span class="big" aria-hidden="true">🐺🐺</span>
+    <div><h1>One wolf, two wolves</h1><p class="sub">Работа над ошибками · множественное число: -s, -es, -ies, -ves</p></div>
+  </header>
+  <div class="tools"><span class="stars">⭐ <span id="stars">0</span></span><button class="ghost" id="resetAll" type="button">↺ Начать заново</button></div>
+
+  <section class="st s2">
+    <div class="st-head"><div class="num">!</div><div class="t"><h2>Вспомним правило</h2><p>Смотри на <b>конец</b> слова.</p></div></div>
+    <div class="rules">
+      <div class="rc" style="--rc:var(--blue)"><span class="tag">+s</span><span class="w">dog → dog<b>s</b></span><span class="ru">почти все слова</span><span class="ex">day → day<b>s</b><br><small>гласная + y → просто -s</small></span></div>
+      <div class="rc" style="--rc:var(--violet)"><span class="tag">+es</span><span class="w">bus → bus<b>es</b></span><span class="ru">на конце <b>s, ss, sh, ch, x</b></span><span class="ex">wish → wish<b>es</b></span></div>
+      <div class="rc" style="--rc:var(--sun)"><span class="tag">+ies</span><span class="w">city → cit<b>ies</b></span><span class="ru">согласная + <b>y</b>: <b>y убираем!</b></span><span class="ex">lady → lad<b>ies</b><br><small>не ladyies ✗</small></span></div>
+      <div class="rc" style="--rc:var(--cant)"><span class="tag">+ves</span><span class="w">wolf → wol<b>ves</b></span><span class="ru">на конце <b>f</b> или <b>fe</b>: <b>f, fe убираем!</b></span><span class="ex">wife → wi<b>ves</b><br><small>не wifes ✗</small></span></div>
+    </div>
+  </section>
+
+  <section class="st s1">
+    <div class="st-head"><div class="num">1</div><div class="t"><h2>Sort the words</h2><p>Нажми на слово, потом на корзинку с правильным окончанием.</p></div></div>
+    <div class="pool" id="pool"></div>
+    <div class="baskets" id="baskets"></div>
+    <div class="tools"><span class="done" id="sortDone" hidden>Все слова на месте! 🎉</span><button class="ghost" id="sortAgain" type="button">↺ Ещё раз</button></div>
+  </section>
+
+  <section class="st s3">
+    <div class="st-head"><div class="num">2</div><div class="t"><h2>Spot the right word</h2><p>Какое слово написано <b>правильно</b>? Нажми на него.</p></div></div>
+    <div class="spot" id="spot"></div>
+  </section>
+
+  <section class="st s4">
+    <div class="st-head"><div class="num">3</div><div class="t"><h2>Write it</h2><p>Напиши слово во множественном числе и нажми «Проверить».</p></div></div>
+    <div class="quiz" id="typ"></div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let stars=0;
+function star(){stars++;$('stars').textContent=stars;const p=$('stars').parentElement;p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop')}
+function shake(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad')}
+const W=[['ruler','📏','s','rulers'],['dog','🐶','s','dogs'],['lady','👩','ies','ladies'],['mother','👩‍👧','s','mothers'],['bus','🚌','es','buses'],
+ ['day','🌞','s','days'],['boss','👔','es','bosses'],['wolf','🐺','ves','wolves'],['school','🏫','s','schools'],['wish','🌠','es','wishes'],
+ ['diary','📔','ies','diaries'],['wife','👰','ves','wives'],['calf','🐮','ves','calves'],['teddy','🧸','ies','teddies'],['city','🏙️','ies','cities'],['pinch','🤏','es','pinches']];
+const HINT={s:'Обычное слово — просто -s.',es:'На конце s, ss, sh или ch → -es.',ies:'Согласная + y → y убираем, пишем -ies.',ves:'На конце f или fe → убираем, пишем -ves.'};
+const DAYH='day: перед y гласная a → просто -s (days).';
+/* sort */
+let sel=null,left=0;
+function buildSort(){
+  sel=null;left=W.length;$('sortDone').hidden=true;$('pool').innerHTML='';$('baskets').innerHTML='';
+  ['s','es','ies','ves'].forEach(k=>{const b=document.createElement('div');b.className='basket k-'+k;b.setAttribute('role','button');b.tabIndex=0;b.dataset.k=k;
+    b.innerHTML=`<span class="h">+${k}</span><span class="in"></span><span class="hint" hidden></span>`;
+    const go=()=>drop(b);b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};$('baskets').appendChild(b)});
+  shuf(W).forEach(([w,em,k,pl])=>{const c=document.createElement('button');c.type='button';c.className='chip';c.dataset.k=k;c.dataset.w=w;c.dataset.pl=pl;
+    c.innerHTML=`<span class="e">${em}</span>${w}`;
+    c.onclick=()=>{if(c.classList.contains('placed'))return;$('pool').querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');sel=c};$('pool').appendChild(c)});
+}
+function drop(b){
+  if(!sel)return;const h=b.querySelector('.hint');
+  if(sel.dataset.k===b.dataset.k){const pl=sel.dataset.pl,w=sel.dataset.w;sel.classList.remove('sel');sel.classList.add('placed');
+    sel.innerHTML=`${sel.querySelector('.e').outerHTML}<span>${mark(w,pl)}</span>`;b.querySelector('.in').appendChild(sel);sel=null;h.hidden=true;star();
+    if(--left===0)$('sortDone').hidden=false}
+  else{shake(b);h.hidden=false;h.textContent='Не сюда. '+(sel.dataset.w==='day'?DAYH:HINT[sel.dataset.k])}
+}
+function mark(w,pl){let i=0;while(i<w.length&&w[i]===pl[i])i++;return pl.slice(0,i)+'<b>'+pl.slice(i)+'</b>'}
+$('sortAgain').onclick=buildSort;
+/* spot */
+const SP=[['👩','ladies','ladyies','y убираем → lad + ies'],['🏙️','cities','citys','согласная + y → ies'],['👰','wives','wifes','fe → ves'],['🌞','days','daies','перед y гласная → просто -s'],
+ ['🚌','buses','buss','на конце s → -es'],['🏫','schools','schooles','обычное слово → -s'],['🧸','teddies','teddyies','y убираем → tedd + ies'],['📔','diaries','diaryes','y убираем → diar + ies'],
+ ['🐮','calves','calfs','f → ves'],['🤏','pinches','pinchs','на конце ch → -es']];
+function buildSpot(){$('spot').innerHTML='';
+  SP.forEach(([em,ok,bad,h])=>{const c=document.createElement('div');c.className='sc';
+    c.innerHTML=`<div class="e">${em}</div><div class="o"></div><div class="h" hidden>💡 ${h}</div>`;
+    shuf([ok,bad]).forEach(x=>{const b=document.createElement('button');b.type='button';b.className='opt';b.textContent=x;
+      b.onclick=()=>{if(c.classList.contains('ok'))return;if(x===ok){b.classList.add('good');c.classList.add('ok');star()}else{shake(b);b.classList.add('wrong');c.querySelector('.h').hidden=false}};
+      c.querySelector('.o').appendChild(b)});$('spot').appendChild(c)})}
+/* type */
+function buildTyp(){const el=$('typ');el.innerHTML='';let ok=0;const items=shuf(W);
+  const sc=document.createElement('div');sc.className='score';sc.innerHTML=`<span>Правильно: <span class="k">0</span> из ${items.length}</span><span class="bar"><i></i></span><button class="ghost" type="button">↺ Ещё раз</button>`;
+  sc.querySelector('button').onclick=buildTyp;
+  const grid=document.createElement('div');grid.className='tgrid';
+  items.forEach(([w,em,k,pl])=>{const r=document.createElement('div');r.className='tr';
+    r.innerHTML=`<span class="e">${em}</span><span class="w">a ${w} → two</span><input id="in-${w}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${w}: множественное число"><button class="go" type="button">Проверить</button><div class="h" hidden>💡 ${w==='day'?DAYH:HINT[k]}</div>`;
+    const inp=r.querySelector('input'),h=r.querySelector('.h');
+    const check=()=>{if(r.classList.contains('ok'))return;const v=inp.value.trim().toLowerCase();if(!v)return;
+      if(v===pl){r.classList.add('ok');inp.readOnly=true;ok++;star();sc.querySelector('.k').textContent=ok;sc.querySelector('i').style.width=ok/items.length*100+'%'}else{shake(inp);h.hidden=false}};
+    r.querySelector('.go').onclick=check;inp.onkeydown=e=>{if(e.key==='Enter')check()};grid.appendChild(r)});
+  el.appendChild(grid);el.appendChild(sc)}
+function all(){stars=0;$('stars').textContent=0;buildSort();buildSpot();buildTyp()}
+$('resetAll').onclick=()=>{all();window.scrollTo({top:0,behavior:'smooth'})};
+all();
+</script>
+
+</body>
+</html>
