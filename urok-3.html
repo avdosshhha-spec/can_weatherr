@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Урок 3 · Экология</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d1d1f; --muted:#6b6b70; --line:#dcd8cf;
+  --accent:#2f5d8a; --accent-ink:#ffffff; --ok:#1f7a45; --ok-bg:#e3f3e8; --bad:#b3261e; --bad-bg:#fbe6e4;
+  --gap-bg:#fbfaf6; --rule:#eef3f8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --card:#202226; --ink:#ececee; --muted:#9a9aa2; --line:#363840;
+    --accent:#7fb0e0; --accent-ink:#0e1620; --ok:#6fd39a; --ok-bg:#183326; --bad:#ff8a80; --bad-bg:#3a1d1b;
+    --gap-bg:#191a1d; --rule:#1d2733;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a; --card:#202226; --ink:#ececee; --muted:#9a9aa2; --line:#363840;
+  --accent:#7fb0e0; --accent-ink:#0e1620; --ok:#6fd39a; --ok-bg:#183326; --bad:#ff8a80; --bad-bg:#3a1d1b;
+  --gap-bg:#191a1d; --rule:#1d2733;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px 80px}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
+header.top .t{font-weight:700;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);white-space:nowrap}
+.score b{color:var(--ink)}
+nav.jump{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;max-width:820px;margin:0 auto;scrollbar-width:none}
+nav.jump::-webkit-scrollbar{display:none}
+nav.jump a{flex:none;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;background:var(--card)}
+nav.jump a.done{border-color:var(--ok);color:var(--ok)}
+h1{font-size:24px;line-height:1.25;margin:28px 0 6px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:15px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;margin:18px 0;scroll-margin-top:110px}
+.card h2{font-size:18px;margin:0 0 6px}
+.instr{margin:0 0 14px;color:var(--muted);font-size:15px}
+.memo{background:var(--rule);border-color:transparent}
+.memo ol{margin:6px 0 0;padding-left:20px}
+.rule{background:var(--rule);border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:15px}
+.rule table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+.rule th,.rule td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.rule th{font-weight:600}
+.rule ul{margin:6px 0 0;padding-left:20px}
+.rule li{margin:3px 0}
+.rule p{margin:6px 0}
+.rule .ex{color:var(--muted)}
+.rule td:first-child{white-space:nowrap}
+.rule table.stack td:first-child{white-space:normal}
+@media (max-width:600px){
+  .rule table.stack tr:first-child{display:none}
+  .rule table.stack tr{display:block;padding:8px 0;border-bottom:1px solid var(--line)}
+  .rule table.stack td{display:block;border:none;padding:1px 0}
+  .rule table.stack td:first-child{font-weight:700}
+  .rule table.stack td:nth-child(3)::before{content:"Подсказки: ";color:var(--muted)}
+  .rule table.stack td:nth-child(4)::before{content:"Пример: ";color:var(--muted)}
+}
+.mcopts{margin:6px 0 0;font-size:15px;line-height:1.6}
+.info p{margin:6px 0}
+.texttitle{font-style:italic;font-weight:600;margin:4px 0 8px}
+.text p{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.85}
+.num{font-weight:700;color:var(--muted);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.base{font-size:13px;color:var(--muted);letter-spacing:.02em}
+input.gap{font:inherit;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;
+  border:none;border-bottom:2px solid var(--line);background:var(--gap-bg);color:var(--ink);
+  padding:2px 6px;border-radius:6px 6px 0 0;min-width:6ch;max-width:100%;outline:none;transition:border-color .15s,background .15s}
+input.gap:focus{border-bottom-color:var(--accent)}
+input.gap.ok{border-bottom-color:var(--ok);background:var(--ok-bg)}
+input.gap.bad{border-bottom-color:var(--bad);background:var(--bad-bg)}
+.fix{display:inline-block;font-size:14px;color:var(--ok);font-weight:600;margin-left:4px}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 22px;margin:0;padding:0;list-style:none}
+.list li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.list .w{min-width:7.5em}
+.sents{margin:0;padding-left:22px}
+.sents li{margin:0 0 12px;line-height:1.9}
+.tf li{margin:0 0 14px}
+.headings{margin:0 0 14px;padding-left:22px}
+.headings li{margin:2px 0}
+.tf .opts.nums button{min-width:44px}
+.tf .lbl{font-weight:700}
+.tf .opts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.tf button{font:inherit;font-size:14px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--gap-bg);color:var(--ink);cursor:pointer}
+.tf button.sel{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.tf button.sel.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.tf button.sel.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.tf button.right{outline:2px solid var(--ok);outline-offset:1px}
+table.vocab{width:100%;border-collapse:collapse;font-size:15px;margin:0 0 16px}
+table.vocab td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.vocab td:first-child{font-weight:600;width:42%}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.actions button{font:inherit;font-size:14px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.actions button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.actions .res{margin-left:auto;font-size:14px;font-weight:600}
+.res.good{color:var(--ok)} .res.mid{color:var(--ink)}
+.expl{display:none;margin-top:12px;font-size:14px;background:var(--gap-bg);border-radius:10px;padding:10px 14px}
+.expl.show{display:block}
+.expl ul{margin:0;padding-left:18px}
+.expl li{margin:3px 0}
+details.nojs{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:14px}
+details.nojs summary{cursor:pointer;font-weight:600;color:var(--accent)}
+details.nojs ul{margin:8px 0 0;padding-left:18px}
+.hint{background:var(--rule);border-color:transparent;font-size:15px}
+.reset-all{display:block;margin:30px auto 0;font:inherit;font-size:14px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;cursor:pointer}
+@media (max-width:480px){
+  .card{padding:16px 14px 14px;border-radius:12px}
+  .text p{font-size:16px}
+  h1{font-size:21px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="t">Урок 3 · Природа и экология</div>
+    <div class="score">Баллы: <b id="total">0</b> / <span id="max">57</span></div>
+  </div>
+  <nav class="jump" id="jump"><a href="#t31" id="nav_t31">3.1</a><a href="#t32" id="nav_t32">3.2</a><a href="#t33" id="nav_t33">3.3</a><a href="#t34" id="nav_t34">3.4</a><a href="#t35" id="nav_t35">3.5</a><a href="#t36" id="nav_t36">3.6</a><a href="#t37" id="nav_t37">3.7</a><a href="#t38" id="nav_t38">Д/З</a></nav>
+</header>
+
+<main class="wrap">
+  <h1>Урок 3</h1>
+  <p class="sub">Словообразование: наречия и глаголы · Грамматика: пассивный залог · Тема: природа и экология</p>
+
+  <section class="card memo">
+    <h2>Памятка: как заполнять пропуск в словообразовании</h2>
+    <ol>
+      <li>Какая часть речи нужна? После артикля или прилагательного — существительное; перед существительным или после be — прилагательное; при глаголе — наречие.</li>
+      <li>Нужно ли отрицание (un-, in-, im-, dis-)?</li>
+      <li>Нужно ли множественное число или -s / -ed у глагола?</li>
+      <li>Проверь написание по буквам: ошибка в одной букве = 0 баллов.</li>
+    </ol>
+  </section>
+
+  <div class="card hint" id="nojsHint"><b>Если кнопки «Проверить» не появились</b>, значит файл открыт во встроенном просмотре (Telegram, почта, «Файлы» и т. п.). Задания всё равно можно читать, а ответы — открыть под каждым заданием. Чтобы всё работало, откройте файл в браузере: Chrome, Safari, Яндекс Браузер.</div>
+<div id="tasks"><section class="card" id="t31"><h2>Задание 3.1</h2><p class="instr">Образуйте наречия от данных прилагательных.</p><div class="rule"><b>Правило: как образовать наречие</b>
+<p>Наречие отвечает на вопрос «как?» и относится к глаголу (run <b>quickly</b>), прилагательному (<b>really</b> serious) или ко всему предложению (<b>Fortunately</b>, …). Обычно наречие = прилагательное + <b>-ly</b>: quick → quickly.</p>
+<table><tbody><tr><th>Правило</th><th>Примеры</th></tr>
+<tr><td>просто + ly, e сохраняется</td><td>slow → slowly, rare → rarely, complete → completely</td></tr>
+<tr><td>-l + ly = <b>-lly</b> (две l)</td><td>careful → carefully, natural → naturally</td></tr>
+<tr><td>-y после согласной → <b>-ily</b></td><td>angry → angrily, lucky → luckily</td></tr>
+<tr><td>-le → <b>-ly</b> (e уходит)</td><td>terrible → terribly, simple → simply</td></tr>
+<tr><td>-ic → <b>-ically</b></td><td>dramatic → dramatically (но public → publicly)</td></tr>
+<tr><td>от существительного — два шага</td><td>nation → national → nationally</td></tr></tbody></table>
+<b>Исключения</b>
+<ul><li>good → <b>well</b>: She sings well.</li>
+<li>fast, hard, late, early не меняются: He works hard.</li>
+<li><b>hardly</b> = «едва, почти не», <b>lately</b> = «в последнее время» — это другие слова.</li>
+<li>day → <b>daily</b> (y → i).</li>
+<li>friendly, lovely — прилагательные, наречий на -ly от них нет.</li></ul></div><ul class="list"><li><span class="w">1. absolute →</span><input class="gap" data-key="t31_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">2. actual →</span><input class="gap" data-key="t31_1" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">3. complete →</span><input class="gap" data-key="t31_2" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">4. day →</span><input class="gap" data-key="t31_3" style="width:8ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">5. definite →</span><input class="gap" data-key="t31_4" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">6. easy →</span><input class="gap" data-key="t31_5" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">7. especial →</span><input class="gap" data-key="t31_6" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">8. final →</span><input class="gap" data-key="t31_7" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">9. fluent →</span><input class="gap" data-key="t31_8" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">10. happy →</span><input class="gap" data-key="t31_9" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">11. probable →</span><input class="gap" data-key="t31_10" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">12. rare →</span><input class="gap" data-key="t31_11" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">13. real →</span><input class="gap" data-key="t31_12" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">14. regular →</span><input class="gap" data-key="t31_13" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">15. tradition (2 шага) →</span><input class="gap" data-key="t31_14" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">16. usual →</span><input class="gap" data-key="t31_15" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li></ul><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. absolute → absolutely</b> — просто + ly, e сохраняется</li><li><b>2. actual → actually</b> — -l + ly = -lly</li><li><b>3. complete → completely</b> — e сохраняется</li><li><b>4. day → daily</b> — исключение: y → i, не dayly</li><li><b>5. definite → definitely</b> — defin<b>i</b>tely, не definately</li><li><b>6. easy → easily</b> — y → i</li><li><b>7. especial → especially</b> — -l + ly = -lly</li><li><b>8. final → finally</b> — -l + ly = -lly</li><li><b>9. fluent → fluently</b> — просто + ly</li><li><b>10. happy → happily</b> — y → i</li><li><b>11. probable → probably</b> — -le → -ly, не probablely</li><li><b>12. rare → rarely</b> — e сохраняется</li><li><b>13. real → really</b> — -l + ly = -lly</li><li><b>14. regular → regularly</b> — просто + ly</li><li><b>15. tradition (2 шага) → traditionally</b> — tradition → traditional → traditionally</li><li><b>16. usual → usually</b> — -l + ly = -lly</li></ul></details></section><section class="card" id="t32"><h2>Задание 3.2</h2><p class="instr">Образуйте глаголы от данных слов.</p><div class="rule"><b>Правило: как образовать глагол</b>
+<table><tbody><tr><th>Способ</th><th>Значение</th><th>Примеры</th></tr>
+<tr><td>-ise / -ize</td><td>делать каким-то</td><td>organ → organise, critic → criticise</td></tr>
+<tr><td>-en (в конце)</td><td>делать каким-то, становиться</td><td>dark → darken, length → lengthen</td></tr>
+<tr><td>-ify</td><td>делать</td><td>pure → purify, beauty → beautify</td></tr>
+<tr><td>en- (в начале)</td><td>приводить в состояние, давать</td><td>large → enlarge, rich → enrich</td></tr></tbody></table>
+<p><b>-ise или -ize?</b> -ise — британский вариант, -ize — американский. На ОГЭ засчитывают оба.</p></div><ul class="list"><li><span class="w">1. symbol →</span><input class="gap" data-key="t32_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">2. real →</span><input class="gap" data-key="t32_1" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">3. modern →</span><input class="gap" data-key="t32_2" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">4. wide →</span><input class="gap" data-key="t32_3" style="width:8ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">5. strength →</span><input class="gap" data-key="t32_4" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">6. simple →</span><input class="gap" data-key="t32_5" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">7. courage →</span><input class="gap" data-key="t32_6" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">8. danger →</span><input class="gap" data-key="t32_7" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">9. able →</span><input class="gap" data-key="t32_8" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">10. short →</span><input class="gap" data-key="t32_9" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li></ul><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. symbol → symbolise / symbolize</b> — -ise / -ize, «символизировать»</li><li><b>2. real → realise / realize</b> — «осознавать»</li><li><b>3. modern → modernise / modernize</b> — «модернизировать»</li><li><b>4. wide → widen</b> — -en, «расширять»</li><li><b>5. strength → strengthen</b> — -en, «укреплять»</li><li><b>6. simple → simplify</b> — -le → -ify, «упрощать»</li><li><b>7. courage → encourage</b> — en-, «поощрять»</li><li><b>8. danger → endanger</b> — en-, «подвергать опасности»</li><li><b>9. able → enable</b> — en-, «давать возможность»</li><li><b>10. short → shorten</b> — -en, «укорачивать»</li></ul></details></section><section class="card" id="t33"><h2>Задание 3.3 · формат ОГЭ (29–34)</h2><p class="instr">Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту.</p><div class="rule"><b>Как понять, что нужно наречие</b>
+<ul><li>Слово стоит при глаголе (is changing very …, collect …) — нужно <b>наречие</b>.</li>
+<li>Слово стоит перед прилагательным и усиливает его (… serious, … bad) — <b>наречие</b>.</li>
+<li>Слово стоит в начале предложения перед запятой (… , more and more people…) — <b>наречие-вводное слово</b>: Luckily, Surprisingly.</li>
+<li>Проверь смысл: хорошая это новость или плохая? Нужна ли приставка un-?</li></ul></div><div class="texttitle">Our planet needs help</div><div class="text"><p>Many people think that ecological problems are <span class="num">(29)</span> <input class="gap" data-key="t33_0" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(REAL)</span> serious. Air pollution is <span class="num">(30)</span> <input class="gap" data-key="t33_1" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(ESPECIAL)</span> bad in big cities. Scientists say that the climate is changing very <span class="num">(31)</span> <input class="gap" data-key="t33_2" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(QUICK)</span>. We should <span class="num">(32)</span> <input class="gap" data-key="t33_3" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(DEFINITE)</span> use less plastic in our everyday life. <span class="num">(33)</span> <input class="gap" data-key="t33_4" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(FORTUNATE)</span>, more and more people sort their rubbish now. At our school, we collect old paper for recycling <span class="num">(34)</span> <input class="gap" data-key="t33_5" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(REGULAR)</span>.</p></div><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>(29) really</b> — наречие усиливает прилагательное serious; real + ly = really</li><li><b>(30) especially</b> — наречие перед прилагательным bad</li><li><b>(31) quickly</b> — is changing very … — наречие при глаголе</li><li><b>(32) definitely</b> — наречие между should и глаголом; defin<b>i</b>tely</li><li><b>(33) fortunately</b> — наречие в начале предложения; новость хорошая, поэтому без un-</li><li><b>(34) regularly</b> — наречие при глаголе collect</li></ul></details></section><section class="card" id="t34"><h2>Задание 3.4</h2><p class="instr">Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту. Здесь нужны и глаголы, и наречия.</p><div class="rule"><b>Подсказка</b>
+<ul><li>После must, should, can, to нужен <b>глагол</b> в начальной форме.</li>
+<li>Если подлежащее «он, она, оно» (recycling, the town) — у глагола в настоящем времени окончание <b>-s</b>.</li>
+<li>После am / is / are + … + by — пассив, нужна третья форма: <b>-ed</b>.</li></ul></div><div class="texttitle">Can we save the planet?</div><div class="text"><p>Today many animal species are <span class="num">(1)</span> <input class="gap" data-key="t34_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(DANGER)</span> by human activity. To protect them, governments must <span class="num">(2)</span> <input class="gap" data-key="t34_1" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(STRENGTH)</span> environmental laws. The amount of plastic waste is growing <span class="num">(3)</span> <input class="gap" data-key="t34_2" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(DRAMATIC)</span> every year. Unfortunately, few people <span class="num">(4)</span> <input class="gap" data-key="t34_3" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(REAL)</span> how serious the problem is. Recycling <span class="num">(5)</span> <input class="gap" data-key="t34_4" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(ABLE)</span> us to save energy and resources. That is why many schools now <span class="num">(6)</span> <input class="gap" data-key="t34_5" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(COURAGE)</span> children to sort their rubbish at home.</p></div><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>(1) endangered</b> — are … by — пассив: endanger + ed</li><li><b>(2) strengthen</b> — must + глагол</li><li><b>(3) dramatically</b> — is growing … — наречие; -ic → -ically</li><li><b>(4) realise / realize</b> — few people (они) + глагол без -s</li><li><b>(5) enables</b> — recycling (оно) → -s</li><li><b>(6) encourage</b> — schools (они) + глагол без -s</li></ul></details></section><section class="card" id="t35"><h2>Задание 3.5 · формат ОГЭ (20–28)</h2><p class="instr">Преобразуйте слова в скобках так, чтобы они грамматически соответствовали тексту.</p><div class="rule"><b>Правило: пассивный залог</b>
+<p>В пассиве важно действие и предмет, а не тот, кто это сделал: «Школу построили в 1985 году» → The school <b>was built</b> in 1985.</p>
+<p><b>Формула:</b> be в нужном времени + V3 (третья форма или -ed).</p>
+<table class="stack"><tbody><tr><th>Время</th><th>Подсказки</th><th>Форма be</th><th>Пример</th></tr>
+<tr><td>Present Simple</td><td>every day, usually, always</td><td>am / is / are + V3</td><td>English is spoken all over the world.</td></tr>
+<tr><td>Past Simple</td><td>in 1985, last year, ago</td><td>was / were + V3</td><td>The bridge was built in 1985.</td></tr>
+<tr><td>Future Simple</td><td>next year, tomorrow, soon</td><td>will be + V3</td><td>The results will be announced tomorrow.</td></tr>
+<tr><td>Present Continuous</td><td>now, at the moment, Look!</td><td>am / is / are <b>being</b> + V3</td><td>The road is being repaired now.</td></tr>
+<tr><td>Present Perfect</td><td>since, already, just, this year</td><td>have / has <b>been</b> + V3</td><td>The letter has already been sent.</td></tr></tbody></table>
+<b>Как решать</b>
+<ul><li>Найди маркер времени.</li>
+<li>Поставь be в это время и согласуй с подлежащим: one tree <b>was</b> / trees <b>were</b>; it <b>has</b> / they <b>have</b>.</li>
+<li>Добавь V3. Неправильные глаголы — по таблице: write → written, make → made.</li>
+<li>Кто сделал — через <b>by</b>: written <b>by</b> a famous writer.</li></ul>
+<p>Превосходная степень: one of the + -est + существительное во множественном числе: one of the tallest buildings.</p></div><div class="texttitle">The history of our park</div><div class="text"><p>Our town park <span class="num">(20)</span> <input class="gap" data-key="t35_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(OPEN)</span> in 1965. At that time, hundreds of trees <span class="num">(21)</span> <input class="gap" data-key="t35_1" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(PLANT)</span> there by local schoolchildren. Today the park <span class="num">(22)</span> <input class="gap" data-key="t35_2" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(VISIT)</span> by thousands of people every year. Last year a new playground <span class="num">(23)</span> <input class="gap" data-key="t35_3" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(BUILD)</span> near the lake. At the moment the old fountain <span class="num">(24)</span> <input class="gap" data-key="t35_4" style="width:20ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(REPAIR)</span>. Next spring, a cycle path <span class="num">(25)</span> <input class="gap" data-key="t35_5" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(ADD)</span>. Since 2020, more than five hundred new trees <span class="num">(26)</span> <input class="gap" data-key="t35_6" style="width:20ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(PLANT)</span> here. The park is one of the <span class="num">(27)</span> <input class="gap" data-key="t35_7" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(GREEN)</span> places in our town, and I think it is the <span class="num">(28)</span> <input class="gap" data-key="t35_8" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(NICE)</span> place to spend a weekend.</p></div><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>(20) was opened</b> — in 1965 → Past Simple Passive</li><li><b>(21) were planted</b> — trees (много), прошлое → were + V3</li><li><b>(22) is visited</b> — every year → Present Simple Passive</li><li><b>(23) was built</b> — last year → Past Simple Passive; build — built</li><li><b>(24) is being repaired</b> — at the moment → is being + V3</li><li><b>(25) will be added</b> — next spring → will be + V3</li><li><b>(26) have been planted</b> — since 2020 → Present Perfect Passive; trees → have</li><li><b>(27) greenest</b> — one of the + превосходная степень</li><li><b>(28) nicest</b> — the + превосходная степень: nice + st</li></ul></details></section><section class="card" id="t36"><h2>Задание 3.6 · Лексика «Природа и экология»</h2><p class="instr">Выучите слова, затем вставьте подходящие слова из таблицы в правильной форме.</p><table class="vocab"><tbody><tr><td>pollution</td><td>загрязнение</td></tr><tr><td>waste</td><td>отходы</td></tr><tr><td>rubbish</td><td>мусор</td></tr><tr><td>to recycle</td><td>перерабатывать</td></tr><tr><td>single-use plastic</td><td>одноразовый пластик</td></tr><tr><td>packaging</td><td>упаковка</td></tr><tr><td>endangered species</td><td>исчезающие виды</td></tr><tr><td>to protect</td><td>защищать</td></tr><tr><td>to reduce</td><td>сокращать</td></tr><tr><td>climate change</td><td>изменение климата</td></tr><tr><td>renewable energy</td><td>возобновляемая энергия</td></tr><tr><td>natural disaster</td><td>стихийное бедствие</td></tr><tr><td>forest fire</td><td>лесной пожар</td></tr><tr><td>campaign</td><td>кампания (действия ради цели)</td></tr><tr><td>signature</td><td>подпись</td></tr><tr><td>council</td><td>совет (городской)</td></tr></tbody></table><ol class="sents"><li>Every summer <input class="gap" data-key="t36_0_0" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> destroy thousands of hectares of Siberian taiga.</li><li>Sun and wind are sources of <input class="gap" data-key="t36_1_0" style="width:19ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">.</li><li>We must <input class="gap" data-key="t36_2_0" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> the amount of plastic we use.</li><li>Air <input class="gap" data-key="t36_3_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> is a serious problem in industrial cities.</li><li>The pupils collected 500 <input class="gap" data-key="t36_4_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> to support their idea.</li><li>Floods and earthquakes are examples of <input class="gap" data-key="t36_5_0" style="width:20ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">.</li></ol><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. forest fires</b> — глагол destroy без -s → множественное число</li><li><b>2. renewable energy</b> — «возобновляемая энергия»</li><li><b>3. reduce</b> — must + глагол, «сократить»</li><li><b>4. pollution</b> — air pollution — загрязнение воздуха</li><li><b>5. signatures</b> — после 500 — множественное число</li><li><b>6. natural disasters</b> — «стихийные бедствия», множественное число</li></ul></details></section><section class="card" id="t37"><h2>Задание 3.7 · Чтение</h2><p class="instr">Прочитайте текст и выберите правильный ответ A, B, C или D.</p><div class="rule"><b>Как решать задание с выбором ответа</b>
+<ul><li>Прочитай вопрос и найди в тексте нужный абзац.</li>
+<li>Правильный ответ обычно передаёт мысль текста <b>другими словами</b>.</li>
+<li>Отбрось варианты, которые противоречат тексту или говорят то, чего в тексте нет.</li>
+<li>Осторожно со словами all, never, always в вариантах: они часто делают утверждение неверным.</li>
+<li>Если слово из варианта есть в тексте, проверь, о том ли оно: совпадение слова ещё не значит, что ответ верный.</li></ul></div><div class="texttitle">The town that said no to plastic</div><div class="text">
+<p>Three years ago, the small town of Greenford decided to stop selling single-use plastic. The idea came from a group of schoolchildren who had watched a documentary about plastic in the ocean. They collected 1,500 signatures and presented them to the town council.</p>
+<p>At first, many shop owners were against the idea. They were afraid that paper bags and glass bottles would be too expensive and that customers would go shopping in the next town instead. To help them, the council paid half the cost of new packaging during the first year.</p>
+<p>Today, most people in Greenford bring their own bags and cups. The amount of rubbish collected in the town has fallen by a third. Tourists come specially to see the "plastic-free town", and some local cafés say business is better than ever.</p>
+<p>Not everything has been easy. Some products, such as medicines, still come in plastic, and the town has not found an alternative yet. But the children who started the campaign, who are now teenagers, say they are proud of what they have achieved.</p></div><ol class="sents tf" style="list-style:none;padding-left:0"><li><span class="lbl">1. Whose idea was it to stop selling plastic?</span><div class="mcopts">A) The town council's<br>B) The shop owners'<br>C) Some schoolchildren's<br>D) The tourists'</div><div class="opts nums" data-key="t37_0"><button type="button" data-v="A">A</button><button type="button" data-v="B">B</button><button type="button" data-v="C" class="">C</button><button type="button" data-v="D">D</button></div></li><li><span class="lbl">2. Why were the shop owners worried at first?</span><div class="mcopts">A) They might lose customers.<br>B) They had too much plastic in stock.<br>C) The council wanted to close their shops.<br>D) Tourists would stop coming.</div><div class="opts nums" data-key="t37_1"><button type="button" data-v="A" class="">A</button><button type="button" data-v="B">B</button><button type="button" data-v="C">C</button><button type="button" data-v="D">D</button></div></li><li><span class="lbl">3. What has happened to the amount of rubbish in the town?</span><div class="mcopts">A) It has doubled.<br>B) It has fallen by a third.<br>C) It has stayed the same.<br>D) It has fallen by half.</div><div class="opts nums" data-key="t37_2"><button type="button" data-v="A">A</button><button type="button" data-v="B" class="">B</button><button type="button" data-v="C">C</button><button type="button" data-v="D">D</button></div></li><li><span class="lbl">4. Which statement is true?</span><div class="mcopts">A) All plastic has disappeared from Greenford.<br>B) Medicines are still sold in plastic packaging.<br>C) Local cafés have lost business.<br>D) The campaign has been stopped.</div><div class="opts nums" data-key="t37_3"><button type="button" data-v="A">A</button><button type="button" data-v="B" class="">B</button><button type="button" data-v="C">C</button><button type="button" data-v="D">D</button></div></li></ol><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. Whose idea was it to stop selling plastic? — C</b>: «The idea came from a group of schoolchildren»</li><li><b>2. Why were the shop owners worried at first? — A</b>: «customers would go shopping in the next town instead»</li><li><b>3. What has happened to the amount of rubbish in the town? — B</b>: «has fallen by a third»; half в тексте — про оплату упаковки, это ловушка</li><li><b>4. Which statement is true? — B</b>: «Some products, such as medicines, still come in plastic»</li></ul></details></section><section class="card" id="t38"><h2>Домашнее задание</h2><div class="info"><p>1) Выучить из таблицы словообразования всю колонку <b>Adverb</b> (наречия).</p>
+<p>2) Написать 8 фактов о своём городе или школе в пассиве. Например: Our school was built in… · Rubbish is collected… · A new park will be opened… · Many trees have been planted…</p></div></section></div>
+  <button class="reset-all" id="resetAll">Стереть все ответы и начать заново</button>
+</main>
+
+<script>
+const TASKS = [
+{
+  id:"t31", nav:"3.1", title:"Задание 3.1", type:"list",
+  instr:"Образуйте наречия от данных прилагательных.",
+  rule:`<b>Правило: как образовать наречие</b>
+<p>Наречие отвечает на вопрос «как?» и относится к глаголу (run <b>quickly</b>), прилагательному (<b>really</b> serious) или ко всему предложению (<b>Fortunately</b>, …). Обычно наречие = прилагательное + <b>-ly</b>: quick → quickly.</p>
+<table><tr><th>Правило</th><th>Примеры</th></tr>
+<tr><td>просто + ly, e сохраняется</td><td>slow → slowly, rare → rarely, complete → completely</td></tr>
+<tr><td>-l + ly = <b>-lly</b> (две l)</td><td>careful → carefully, natural → naturally</td></tr>
+<tr><td>-y после согласной → <b>-ily</b></td><td>angry → angrily, lucky → luckily</td></tr>
+<tr><td>-le → <b>-ly</b> (e уходит)</td><td>terrible → terribly, simple → simply</td></tr>
+<tr><td>-ic → <b>-ically</b></td><td>dramatic → dramatically (но public → publicly)</td></tr>
+<tr><td>от существительного — два шага</td><td>nation → national → nationally</td></tr></table>
+<b>Исключения</b>
+<ul><li>good → <b>well</b>: She sings well.</li>
+<li>fast, hard, late, early не меняются: He works hard.</li>
+<li><b>hardly</b> = «едва, почти не», <b>lately</b> = «в последнее время» — это другие слова.</li>
+<li>day → <b>daily</b> (y → i).</li>
+<li>friendly, lovely — прилагательные, наречий на -ly от них нет.</li></ul>`,
+  items:[
+    ["absolute",["absolutely"],"просто + ly, e сохраняется"],["actual",["actually"],"-l + ly = -lly"],["complete",["completely"],"e сохраняется"],
+    ["day",["daily"],"исключение: y → i, не dayly"],["definite",["definitely"],"defin<b>i</b>tely, не definately"],["easy",["easily"],"y → i"],
+    ["especial",["especially"],"-l + ly = -lly"],["final",["finally"],"-l + ly = -lly"],["fluent",["fluently"],"просто + ly"],
+    ["happy",["happily"],"y → i"],["probable",["probably"],"-le → -ly, не probablely"],["rare",["rarely"],"e сохраняется"],
+    ["real",["really"],"-l + ly = -lly"],["regular",["regularly"],"просто + ly"],["tradition (2 шага)",["traditionally"],"tradition → traditional → traditionally"],
+    ["usual",["usually"],"-l + ly = -lly"]
+  ]
+},
+{
+  id:"t32", nav:"3.2", title:"Задание 3.2", type:"list",
+  instr:"Образуйте глаголы от данных слов.",
+  rule:`<b>Правило: как образовать глагол</b>
+<table><tr><th>Способ</th><th>Значение</th><th>Примеры</th></tr>
+<tr><td>-ise / -ize</td><td>делать каким-то</td><td>organ → organise, critic → criticise</td></tr>
+<tr><td>-en (в конце)</td><td>делать каким-то, становиться</td><td>dark → darken, length → lengthen</td></tr>
+<tr><td>-ify</td><td>делать</td><td>pure → purify, beauty → beautify</td></tr>
+<tr><td>en- (в начале)</td><td>приводить в состояние, давать</td><td>large → enlarge, rich → enrich</td></tr></table>
+<p><b>-ise или -ize?</b> -ise — британский вариант, -ize — американский. На ОГЭ засчитывают оба.</p>`,
+  items:[
+    ["symbol",["symbolise","symbolize"],"-ise / -ize, «символизировать»"],["real",["realise","realize"],"«осознавать»"],["modern",["modernise","modernize"],"«модернизировать»"],
+    ["wide",["widen"],"-en, «расширять»"],["strength",["strengthen"],"-en, «укреплять»"],["simple",["simplify"],"-le → -ify, «упрощать»"],
+    ["courage",["encourage"],"en-, «поощрять»"],["danger",["endanger"],"en-, «подвергать опасности»"],["able",["enable"],"en-, «давать возможность»"],
+    ["short",["shorten"],"-en, «укорачивать»"]
+  ]
+},
+{
+  id:"t33", nav:"3.3", title:"Задание 3.3 · формат ОГЭ (29–34)", type:"text",
+  instr:"Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту.",
+  rule:`<b>Как понять, что нужно наречие</b>
+<ul><li>Слово стоит при глаголе (is changing very …, collect …) — нужно <b>наречие</b>.</li>
+<li>Слово стоит перед прилагательным и усиливает его (… serious, … bad) — <b>наречие</b>.</li>
+<li>Слово стоит в начале предложения перед запятой (… , more and more people…) — <b>наречие-вводное слово</b>: Luckily, Surprisingly.</li>
+<li>Проверь смысл: хорошая это новость или плохая? Нужна ли приставка un-?</li></ul>`,
+  textTitle:"Our planet needs help",
+  paras:[`Many people think that ecological problems are [[29|REAL]] serious. Air pollution is [[30|ESPECIAL]] bad in big cities. Scientists say that the climate is changing very [[31|QUICK]]. We should [[32|DEFINITE]] use less plastic in our everyday life. [[33|FORTUNATE]], more and more people sort their rubbish now. At our school, we collect old paper for recycling [[34|REGULAR]].`],
+  answers:[["really"],["especially"],["quickly"],["definitely"],["fortunately"],["regularly"]],
+  notes:["наречие усиливает прилагательное serious; real + ly = really","наречие перед прилагательным bad","is changing very … — наречие при глаголе","наречие между should и глаголом; defin<b>i</b>tely","наречие в начале предложения; новость хорошая, поэтому без un-","наречие при глаголе collect"]
+},
+{
+  id:"t34", nav:"3.4", title:"Задание 3.4", type:"text",
+  instr:"Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту. Здесь нужны и глаголы, и наречия.",
+  rule:`<b>Подсказка</b>
+<ul><li>После must, should, can, to нужен <b>глагол</b> в начальной форме.</li>
+<li>Если подлежащее «он, она, оно» (recycling, the town) — у глагола в настоящем времени окончание <b>-s</b>.</li>
+<li>После am / is / are + … + by — пассив, нужна третья форма: <b>-ed</b>.</li></ul>`,
+  textTitle:"Can we save the planet?",
+  paras:[`Today many animal species are [[1|DANGER]] by human activity. To protect them, governments must [[2|STRENGTH]] environmental laws. The amount of plastic waste is growing [[3|DRAMATIC]] every year. Unfortunately, few people [[4|REAL]] how serious the problem is. Recycling [[5|ABLE]] us to save energy and resources. That is why many schools now [[6|COURAGE]] children to sort their rubbish at home.`],
+  answers:[["endangered"],["strengthen"],["dramatically"],["realise","realize"],["enables"],["encourage"]],
+  notes:["are … by — пассив: endanger + ed","must + глагол","is growing … — наречие; -ic → -ically","few people (они) + глагол без -s","recycling (оно) → -s","schools (они) + глагол без -s"]
+},
+{
+  id:"t35", nav:"3.5", title:"Задание 3.5 · формат ОГЭ (20–28)", type:"text",
+  instr:"Преобразуйте слова в скобках так, чтобы они грамматически соответствовали тексту.",
+  rule:`<b>Правило: пассивный залог</b>
+<p>В пассиве важно действие и предмет, а не тот, кто это сделал: «Школу построили в 1985 году» → The school <b>was built</b> in 1985.</p>
+<p><b>Формула:</b> be в нужном времени + V3 (третья форма или -ed).</p>
+<table class="stack"><tr><th>Время</th><th>Подсказки</th><th>Форма be</th><th>Пример</th></tr>
+<tr><td>Present Simple</td><td>every day, usually, always</td><td>am / is / are + V3</td><td>English is spoken all over the world.</td></tr>
+<tr><td>Past Simple</td><td>in 1985, last year, ago</td><td>was / were + V3</td><td>The bridge was built in 1985.</td></tr>
+<tr><td>Future Simple</td><td>next year, tomorrow, soon</td><td>will be + V3</td><td>The results will be announced tomorrow.</td></tr>
+<tr><td>Present Continuous</td><td>now, at the moment, Look!</td><td>am / is / are <b>being</b> + V3</td><td>The road is being repaired now.</td></tr>
+<tr><td>Present Perfect</td><td>since, already, just, this year</td><td>have / has <b>been</b> + V3</td><td>The letter has already been sent.</td></tr></table>
+<b>Как решать</b>
+<ul><li>Найди маркер времени.</li>
+<li>Поставь be в это время и согласуй с подлежащим: one tree <b>was</b> / trees <b>were</b>; it <b>has</b> / they <b>have</b>.</li>
+<li>Добавь V3. Неправильные глаголы — по таблице: write → written, make → made.</li>
+<li>Кто сделал — через <b>by</b>: written <b>by</b> a famous writer.</li></ul>
+<p>Превосходная степень: one of the + -est + существительное во множественном числе: one of the tallest buildings.</p>`,
+  textTitle:"The history of our park",
+  paras:[`Our town park [[20|OPEN]] in 1965. At that time, hundreds of trees [[21|PLANT]] there by local schoolchildren. Today the park [[22|VISIT]] by thousands of people every year. Last year a new playground [[23|BUILD]] near the lake. At the moment the old fountain [[24|REPAIR]]. Next spring, a cycle path [[25|ADD]]. Since 2020, more than five hundred new trees [[26|PLANT]] here. The park is one of the [[27|GREEN]] places in our town, and I think it is the [[28|NICE]] place to spend a weekend.`],
+  answers:[["was opened"],["were planted"],["is visited"],["was built"],["is being repaired"],["will be added"],["have been planted"],["greenest"],["nicest"]],
+  notes:["in 1965 → Past Simple Passive","trees (много), прошлое → were + V3","every year → Present Simple Passive","last year → Past Simple Passive; build — built","at the moment → is being + V3","next spring → will be + V3","since 2020 → Present Perfect Passive; trees → have","one of the + превосходная степень","the + превосходная степень: nice + st"]
+},
+{
+  id:"t36", nav:"3.6", title:"Задание 3.6 · Лексика «Природа и экология»", type:"sents",
+  instr:"Выучите слова, затем вставьте подходящие слова из таблицы в правильной форме.",
+  pre:"vocab",
+  items:[
+    ["Every summer [[]] destroy thousands of hectares of Siberian taiga.",[["forest fires"]],"глагол destroy без -s → множественное число"],
+    ["Sun and wind are sources of [[]].",[["renewable energy"]],"«возобновляемая энергия»"],
+    ["We must [[]] the amount of plastic we use.",[["reduce"]],"must + глагол, «сократить»"],
+    ["Air [[]] is a serious problem in industrial cities.",[["pollution"]],"air pollution — загрязнение воздуха"],
+    ["The pupils collected 500 [[]] to support their idea.",[["signatures"]],"после 500 — множественное число"],
+    ["Floods and earthquakes are examples of [[]].",[["natural disasters"]],"«стихийные бедствия», множественное число"]
+  ]
+},
+{
+  id:"t37", nav:"3.7", title:"Задание 3.7 · Чтение", type:"choice",
+  instr:"Прочитайте текст и выберите правильный ответ A, B, C или D.",
+  rule:`<b>Как решать задание с выбором ответа</b>
+<ul><li>Прочитай вопрос и найди в тексте нужный абзац.</li>
+<li>Правильный ответ обычно передаёт мысль текста <b>другими словами</b>.</li>
+<li>Отбрось варианты, которые противоречат тексту или говорят то, чего в тексте нет.</li>
+<li>Осторожно со словами all, never, always в вариантах: они часто делают утверждение неверным.</li>
+<li>Если слово из варианта есть в тексте, проверь, о том ли оно: совпадение слова ещё не значит, что ответ верный.</li></ul>`,
+  pre:"reading",
+  opts:[["A","A"],["B","B"],["C","C"],["D","D"]], optsClass:"nums",
+  items:[
+    ["1. Whose idea was it to stop selling plastic?","C","«The idea came from a group of schoolchildren»","A) The town council's<br>B) The shop owners'<br>C) Some schoolchildren's<br>D) The tourists'"],
+    ["2. Why were the shop owners worried at first?","A","«customers would go shopping in the next town instead»","A) They might lose customers.<br>B) They had too much plastic in stock.<br>C) The council wanted to close their shops.<br>D) Tourists would stop coming."],
+    ["3. What has happened to the amount of rubbish in the town?","B","«has fallen by a third»; half в тексте — про оплату упаковки, это ловушка","A) It has doubled.<br>B) It has fallen by a third.<br>C) It has stayed the same.<br>D) It has fallen by half."],
+    ["4. Which statement is true?","B","«Some products, such as medicines, still come in plastic»","A) All plastic has disappeared from Greenford.<br>B) Medicines are still sold in plastic packaging.<br>C) Local cafés have lost business.<br>D) The campaign has been stopped."]
+  ]
+},
+{
+  id:"t38", nav:"Д/З", title:"Домашнее задание", type:"info",
+  instr:"",
+  html:`<p>1) Выучить из таблицы словообразования всю колонку <b>Adverb</b> (наречия).</p>
+<p>2) Написать 8 фактов о своём городе или школе в пассиве. Например: Our school was built in… · Rubbish is collected… · A new park will be opened… · Many trees have been planted…</p>`
+}
+];
+
+const VOCAB = [["pollution","загрязнение"],["waste","отходы"],["rubbish","мусор"],["to recycle","перерабатывать"],["single-use plastic","одноразовый пластик"],["packaging","упаковка"],["endangered species","исчезающие виды"],["to protect","защищать"],["to reduce","сокращать"],["climate change","изменение климата"],["renewable energy","возобновляемая энергия"],["natural disaster","стихийное бедствие"],["forest fire","лесной пожар"],["campaign","кампания (действия ради цели)"],["signature","подпись"],["council","совет (городской)"]];
+
+const READING = `<div class="texttitle">The town that said no to plastic</div><div class="text">
+<p>Three years ago, the small town of Greenford decided to stop selling single-use plastic. The idea came from a group of schoolchildren who had watched a documentary about plastic in the ocean. They collected 1,500 signatures and presented them to the town council.</p>
+<p>At first, many shop owners were against the idea. They were afraid that paper bags and glass bottles would be too expensive and that customers would go shopping in the next town instead. To help them, the council paid half the cost of new packaging during the first year.</p>
+<p>Today, most people in Greenford bring their own bags and cups. The amount of rubbish collected in the town has fallen by a third. Tourists come specially to see the "plastic-free town", and some local cafés say business is better than ever.</p>
+<p>Not everything has been easy. Some products, such as medicines, still come in plastic, and the town has not found an alternative yet. But the children who started the campaign, who are now teenagers, say they are proud of what they have achieved.</p></div>`;
+
+const STORE = "lesson3-oge-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e) { saved = {}; }
+function persist(){ try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch(e) {} }
+
+const norm = s => (s||"").toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g," ").trim();
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const width = arr => Math.max(6, Math.max(...arr.map(a=>a.length)) + 3);
+const results = {};
+
+function gapHTML(key, answers){
+  return `<input class="gap" data-key="${key}" style="width:${width(answers)}ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">`;
+}
+
+/* every task gets t.units: [{key, answers, label, note, kind:'gap'|'choice', correct}] */
+function render(){
+  const root = document.getElementById("tasks");
+  const nav = document.getElementById("jump");
+  root.innerHTML = ""; nav.innerHTML = "";
+  const hint = document.getElementById("nojsHint"); if (hint) hint.remove();
+  let maxTotal = 0;
+  TASKS.forEach(t => {
+    t.units = [];
+    const sec = document.createElement("section");
+    sec.className = "card"; sec.id = t.id;
+    let h = `<h2>${t.title}</h2>` + (t.instr ? `<p class="instr">${t.instr}</p>` : "");
+    if (t.rule) h += `<div class="rule">${t.rule}</div>`;
+    if (t.pre === "vocab") h += `<table class="vocab">${VOCAB.map(v=>`<tr><td>${v[0]}</td><td>${v[1]}</td></tr>`).join("")}</table>`;
+    if (t.pre === "reading") h += READING;
+    if (t.type === "list") {
+      h += `<ul class="list">` + t.items.map((it,i)=>{
+        const key=t.id+"_"+i; t.units.push({key,answers:it[1],label:`${i+1}. ${it[0]} → `,note:it[2],kind:"gap"});
+        return `<li><span class="w">${i+1}. ${it[0]} →</span>${gapHTML(key, it[1])}</li>`;}).join("") + `</ul>`;
+    } else if (t.type === "text") {
+      if (t.textTitle) h += `<div class="texttitle">${t.textTitle}</div>`;
+      let k = 0;
+      h += `<div class="text">` + t.paras.map(p => "<p>" + esc(p).replace(/\[\[(\d+)\|([^\]]+)\]\]/g, (m,num,base) => {
+        const i = k++; const key=t.id+"_"+i;
+        t.units.push({key,answers:t.answers[i],label:`(${num}) `,note:t.notes[i],kind:"gap"});
+        return `<span class="num">(${num})</span> ${gapHTML(key, t.answers[i])} <span class="base">(${base})</span>`;
+      }) + "</p>").join("") + `</div>`;
+    } else if (t.type === "sents") {
+      h += `<ol class="sents">` + t.items.map((it,i)=>{
+        let j = 0;
+        return `<li>${esc(it[0]).replace(/\[\[\]\]/g, () => {
+          const jj=j++; const key=`${t.id}_${i}_${jj}`; const ans=it[1][jj];
+          t.units.push({key,answers:ans,label:`${i+1}. `,note:jj===0?it[2]:"",kind:"gap",multi:it[1].length>1});
+          return gapHTML(key, ans);})}</li>`;}).join("") + `</ol>`;
+    } else if (t.type === "choice") {
+      h += `<ol class="sents tf" style="list-style:none;padding-left:0">` + t.items.map((it,i)=>{
+        const key=t.id+"_"+i; t.units.push({key,correct:it[1],label:it[0],note:it[2],kind:"choice"});
+        return `<li><span class="lbl">${esc(it[0])}</span>${it[3]?`<div class="mcopts">${it[3]}</div>`:""}<div class="opts ${t.optsClass||""}" data-key="${key}">${t.opts.map(o=>`<button type="button" data-v="${o[0]}">${o[1]}</button>`).join("")}</div></li>`;}).join("") + `</ol>`;
+    }
+    if (t.type === "info") { h += `<div class="info">${t.html}</div>`; sec.innerHTML = h; root.appendChild(sec); t.n = 0;
+      const a0 = document.createElement("a"); a0.href = "#"+t.id; a0.textContent = t.nav; a0.id = "nav_"+t.id; nav.appendChild(a0); return; }
+    h += `<div class="actions"><button type="button" class="primary" data-act="check">Проверить</button><button type="button" data-act="show">Показать ответы</button><button type="button" data-act="clear">Сбросить</button><span class="res"></span></div><div class="expl"></div>`;
+    sec.innerHTML = h;
+    root.appendChild(sec);
+    t.n = t.units.length; maxTotal += t.n;
+    const a = document.createElement("a"); a.href = "#"+t.id; a.textContent = t.nav; a.id = "nav_"+t.id; nav.appendChild(a);
+    sec.querySelector(".actions").addEventListener("click", e => {
+      const act = e.target.dataset && e.target.dataset.act; if (!act) return;
+      if (act === "check") check(t, sec, false);
+      if (act === "show") check(t, sec, true);
+      if (act === "clear") clearTask(t, sec);
+    });
+  });
+  document.getElementById("max").textContent = maxTotal;
+
+  document.querySelectorAll("input.gap").forEach(inp => {
+    if (saved[inp.dataset.key]) inp.value = saved[inp.dataset.key];
+    inp.addEventListener("input", () => {
+      saved[inp.dataset.key] = inp.value; persist();
+      inp.classList.remove("ok","bad");
+      const fx = inp.nextElementSibling; if (fx && fx.classList.contains("fix")) fx.remove();
+    });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const all = [...document.querySelectorAll("input.gap")];
+        const nx = all[all.indexOf(inp)+1]; if (nx) nx.focus(); else inp.blur();
+      }
+    });
+  });
+  document.querySelectorAll(".opts").forEach(box => {
+    const k = box.dataset.key;
+    if (saved[k]) { const b = box.querySelector(`[data-v="${saved[k]}"]`); if (b) b.classList.add("sel"); }
+    box.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      box.querySelectorAll("button").forEach(x => x.classList.remove("sel","ok","bad","right"));
+      b.classList.add("sel"); saved[k] = b.dataset.v; persist();
+    });
+  });
+}
+
+function check(t, sec, reveal){
+  let right = 0; const expl = [];
+  t.units.forEach(u => {
+    if (u.kind === "choice") {
+      const box = sec.querySelector(`.opts[data-key="${u.key}"]`);
+      const sel = box.querySelector(".sel");
+      box.querySelectorAll("button").forEach(x=>x.classList.remove("ok","bad","right"));
+      const ok = sel && sel.dataset.v === u.correct;
+      if (sel) sel.classList.add(ok ? "ok" : "bad");
+      if (ok) right++; else if (reveal) box.querySelector(`[data-v="${u.correct}"]`).classList.add("right");
+      expl.push(`<li><b>${esc(u.label)} — ${u.correct}</b>: ${u.note}</li>`);
+    } else {
+      const inp = sec.querySelector(`input[data-key="${u.key}"]`);
+      const ok = u.answers.map(norm).includes(norm(inp.value));
+      inp.classList.remove("ok","bad");
+      const old = inp.nextElementSibling; if (old && old.classList.contains("fix")) old.remove();
+      if (inp.value.trim() !== "" || reveal) inp.classList.add(ok ? "ok" : "bad");
+      if (ok) right++; else if (reveal) inp.insertAdjacentHTML("afterend", `<span class="fix">${esc(u.answers[0])}</span>`);
+      if (u.multi) {
+        if (u.note) { const all = t.units.filter(x=>x.label===u.label && x.multi).map(x=>x.answers[0]).join(" … "); expl.push(`<li><b>${u.label}${esc(all)}</b> — ${u.note}</li>`); }
+      } else expl.push(`<li><b>${esc(u.label)}${esc(u.answers.join(" / "))}</b> — ${u.note}</li>`);
+    }
+  });
+  if (t.extra) expl.push(`<li>${t.extra}</li>`);
+  const res = sec.querySelector(".res");
+  res.textContent = `${right} из ${t.n}`;
+  res.className = "res " + (right === t.n ? "good" : "mid");
+  const ex = sec.querySelector(".expl");
+  if (reveal) { ex.innerHTML = `<ul>${expl.join("")}</ul>`; ex.classList.add("show"); }
+  results[t.id] = right;
+  document.getElementById("nav_"+t.id).classList.toggle("done", right === t.n);
+  document.getElementById("total").textContent = Object.values(results).reduce((a,b)=>a+b,0);
+}
+
+function clearTask(t, sec){
+  sec.querySelectorAll("input.gap").forEach(inp => { inp.value = ""; inp.classList.remove("ok","bad"); delete saved[inp.dataset.key]; });
+  sec.querySelectorAll(".fix").forEach(x => x.remove());
+  sec.querySelectorAll(".opts").forEach(box => { box.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad","right")); delete saved[box.dataset.key]; });
+  sec.querySelector(".res").textContent = "";
+  sec.querySelector(".expl").classList.remove("show");
+  delete results[t.id];
+  document.getElementById("nav_"+t.id).classList.remove("done");
+  document.getElementById("total").textContent = Object.values(results).reduce((a,b)=>a+b,0);
+  persist();
+}
+
+render();
+document.getElementById("resetAll").addEventListener("click", () => {
+  TASKS.forEach(t => clearTask(t, document.getElementById(t.id)));
+  saved = {}; persist(); window.scrollTo({top:0, behavior:"smooth"});
+});
+</script>
+</body>
+</html>
