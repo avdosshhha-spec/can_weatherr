@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Can and Weather</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: one column of stations: can games first, then weather; green can / red can't, sky-blue weather cards */
+:root{
+  --bg:#f3f7ff; --paper:#ffffff; --ink:#1d2a44; --muted:#5b6886; --line:#d7e2f4; --on:#ffffff;
+  --can:#1f9a55; --can-soft:#dcf5e5; --cant:#e2485a; --cant-soft:#ffe4e7;
+  --blue:#2f74e8; --blue-soft:#e2edff; --violet:#8b5cf6; --violet-soft:#eee7ff;
+  --sun:#e2a400; --sun-soft:#fff3cf; --teal:#0e8f9c; --teal-soft:#d9f3f5;
+  --display:"Rubik","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111a2e; --paper:#1a2540; --ink:#eef3ff; --muted:#a6b3d3; --line:#2c3b5f; --on:#0f1a2e;
+  --can:#4fd486; --can-soft:#173d2a; --cant:#ff7b8a; --cant-soft:#4a1f27;
+  --blue:#6aa5ff; --blue-soft:#1f3260; --violet:#ad8cff; --violet-soft:#2f2652;
+  --sun:#ffd258; --sun-soft:#3b3118; --teal:#4fd0dc; --teal-soft:#12383d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111a2e; --paper:#1a2540; --ink:#eef3ff; --muted:#a6b3d3; --line:#2c3b5f; --on:#0f1a2e;
+  --can:#4fd486; --can-soft:#173d2a; --cant:#ff7b8a; --cant-soft:#4a1f27;
+  --blue:#6aa5ff; --blue-soft:#1f3260; --violet:#ad8cff; --violet-soft:#2f2652;
+  --sun:#ffd258; --sun-soft:#3b3118; --teal:#4fd0dc; --teal-soft:#12383d; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:600;font-size:18px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(34px,7vw,52px)} h2{font-size:clamp(22px,4.4vw,30px)} h3{font-size:19px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.sub{color:var(--muted);margin:0}
+.c{color:var(--can);font-weight:800}.n{color:var(--cant);font-weight:800}
+.head{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.head .big{font-size:50px;line-height:1}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stars{display:inline-flex;gap:8px;align-items:center;background:var(--sun-soft);border:2px solid var(--sun);border-radius:99px;padding:6px 16px;font-family:var(--display);font-weight:800;font-size:20px}
+.ghost{background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:6px 14px;font-weight:700;font-size:15px}
+
+section.st{background:var(--paper);border:3px solid var(--cs);border-radius:24px;padding:22px clamp(14px,3vw,28px) 24px;display:flex;flex-direction:column;gap:16px}
+.st-head{display:flex;gap:14px;align-items:center}
+.num{width:46px;height:46px;border-radius:15px;background:var(--cc);color:var(--on);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:23px;flex:none}
+.st-head .t{min-width:0}.st-head p{margin:2px 0 0;color:var(--muted);font-size:16px}
+.s1{--cc:var(--blue);--cs:var(--blue-soft)}.s2{--cc:var(--can);--cs:var(--can-soft)}.s3{--cc:var(--cant);--cs:var(--cant-soft)}
+.s4{--cc:var(--violet);--cs:var(--violet-soft)}.s5{--cc:var(--sun);--cs:var(--sun-soft)}.s6{--cc:var(--teal);--cs:var(--teal-soft)}
+
+/* verb cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.card{position:relative;height:130px;border:none;background:none;padding:0;perspective:700px}
+.card .in{position:absolute;inset:0;display:block;transition:transform .45s;transform-style:preserve-3d}
+.card.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--line);background:var(--bg)}
+.face.back{transform:rotateY(180deg);background:var(--cs);border-color:var(--cc)}
+.face .em{font-size:48px;line-height:1}
+.face .en{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.15}
+.face .ru{font-size:15px;color:var(--muted)}
+.face .tap{font-size:13px;color:var(--muted)}
+
+/* rule */
+.rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.rbox{background:var(--bg);border-radius:16px;padding:12px 16px;display:flex;flex-direction:column;gap:4px;border-top:5px solid var(--rc)}
+.rbox .lab{font-size:15px;color:var(--muted)}
+.rbox .ex{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.35}
+.rbox .ru{font-size:15px;color:var(--muted)}
+.tip{background:var(--sun-soft);border-radius:14px;padding:10px 14px;font-size:17px}
+.tip s{color:var(--cant);text-decoration-thickness:2px}
+
+/* quiz rows */
+.quiz{display:flex;flex-direction:column;gap:10px}
+.qr{display:grid;grid-template-columns:56px 1fr;gap:6px 14px;align-items:center;padding:10px 14px;border-radius:16px;background:var(--bg);border:2px solid transparent}
+.qr.ok{border-color:var(--can);background:var(--can-soft)}
+.qr .pic{font-size:40px;line-height:1;text-align:center}
+.qr .body{min-width:0;display:flex;flex-direction:column;gap:8px}
+.qr .q{font-family:var(--display);font-weight:700;font-size:21px}
+.gap{display:inline-block;min-width:64px;border-bottom:3px solid var(--cc);text-align:center;color:var(--cc);padding:0 6px}
+.ok .gap{border-color:var(--can);color:var(--can);font-weight:800}
+.opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.opt{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:5px 15px;font-weight:800;font-size:19px;font-family:var(--display);text-align:left}
+.opt:hover{border-color:var(--cc)}
+.opt.bad{border-color:var(--cant);background:var(--cant-soft);animation:shake .35s}
+.opt.good{border-color:var(--can);background:var(--can);color:var(--on)}
+.ok .opt:not(.good){opacity:.35}
+.hb{border:none;background:none;color:var(--muted);font-size:15px;text-decoration:underline dotted;padding:4px}
+.qh{font-size:16px;background:var(--sun-soft);border-radius:10px;padding:6px 10px}
+.score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-family:var(--display);font-weight:800}
+.bar{flex:1;min-width:120px;height:14px;border-radius:99px;background:var(--bg);border:2px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--cc);transition:width .3s}
+.res{color:var(--can);font-family:var(--display);font-weight:800}
+
+/* word order */
+.wo{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:16px;background:var(--bg);border:2px solid transparent}
+.wo.ok{border-color:var(--can);background:var(--can-soft)}
+.wo .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.wo .ru{font-size:16px;color:var(--muted)}
+.line{min-height:52px;border-bottom:3px dashed var(--cc);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 0}
+.line.bad{animation:shake .35s;border-color:var(--cant)}
+.ok .line{border-bottom-style:solid;border-color:var(--can)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
+.chip{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:5px 14px;font-weight:800;font-size:20px;font-family:var(--display)}
+.chip.k-can{color:var(--can)}.chip.k-cant{color:var(--cant)}
+.ok .chip{cursor:default}
+
+/* riddles */
+.rid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.rcard{background:var(--bg);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid transparent}
+.rcard.ok{border-color:var(--can);background:var(--can-soft)}
+.rcard .txt{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.45}
+.rcard .who{font-family:var(--display);font-weight:800;color:var(--cc)}
+.rcard .opts .opt{font-size:34px;padding:2px 12px;line-height:1.2}
+.rcard .ans{font-family:var(--display);font-weight:800;color:var(--can);font-size:20px}
+
+/* about me */
+.me{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.mi{background:var(--bg);border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mi .em{font-size:32px;line-height:1}
+.mi .w{font-family:var(--display);font-weight:800;font-size:18px;flex:1;min-width:110px}
+.mi .yn{display:flex;gap:6px}
+.mi .yn button{border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:3px 10px;font-weight:800;font-size:16px}
+.mi .yn .y[aria-pressed="true"]{background:var(--can);border-color:var(--can);color:var(--on)}
+.mi .yn .x[aria-pressed="true"]{background:var(--cant);border-color:var(--cant);color:var(--on)}
+.story{background:var(--sun-soft);border-radius:18px;padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.story .s{font-family:var(--display);font-weight:700;font-size:21px}
+.story .empty{color:var(--muted)}
+.ask{background:var(--bg);border-radius:16px;padding:12px 16px;font-size:17px}
+.ask b{font-family:var(--display)}
+
+.grp{display:inline-flex;gap:6px;margin:2px 4px;vertical-align:middle;flex-wrap:wrap}
+.grp.done .opt:not(.good){display:none}
+.qr .q{line-height:2}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.words span{background:var(--bg);border:2px solid var(--line);border-radius:99px;padding:3px 12px;font-size:16px}
+.wx{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.wc{background:var(--bg);border-radius:18px;padding:12px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.wc .em{font-size:44px;line-height:1.15}
+.wc .en{font-family:var(--display);font-weight:800;font-size:20px}
+.wc .ru{font-size:15px;color:var(--muted)}
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px}
+.mcol{display:flex;flex-direction:column;gap:8px}
+.mbtn{border:2px solid var(--line);background:var(--bg);border-radius:14px;min-height:58px;padding:6px 12px;font-family:var(--display);font-weight:700;font-size:20px}
+.mem{font-size:34px}
+.mbtn.sel{border-color:var(--cc);background:var(--cs);box-shadow:0 0 0 3px var(--cs)}
+.mbtn.done{border-color:var(--can);background:var(--can-soft);opacity:.55;cursor:default}
+.mbtn.bad{border-color:var(--cant);animation:shake .35s}
+.done{font-family:var(--display);font-weight:800;font-size:22px;color:var(--can)}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pk{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:6px 14px;font-family:var(--display);font-weight:700;font-size:18px}
+.pk span{font-size:26px}
+.pk[aria-pressed="true"]{border-color:var(--cc);background:var(--cs);box-shadow:0 0 0 3px var(--cs)}
+
+.sorttitle{font-family:var(--display);font-weight:800;font-size:clamp(24px,5vw,32px);text-align:center}
+.sorttitle span{font-size:1.2em}
+.pool{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:96px;background:var(--bg);border-radius:18px;padding:12px}
+.chipA{display:flex;flex-direction:column;align-items:center;border:3px solid var(--line);background:var(--paper);border-radius:18px;padding:6px 12px;min-width:92px}
+.chipA .e{font-size:44px;line-height:1.1}.chipA .nm{font-family:var(--display);font-weight:700;font-size:16px}
+.chipA.sel{border-color:var(--cc);box-shadow:0 0 0 4px var(--cs);transform:translateY(-3px)}
+.chipA:disabled{cursor:default;min-width:0;padding:4px 8px}.chipA:disabled .e{font-size:34px}
+.baskets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.basket{border:3px dashed;border-radius:20px;min-height:150px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.basket.yes{border-color:var(--can);background:var(--can-soft)}.basket.no{border-color:var(--cant);background:var(--cant-soft)}
+.basket .h{font-family:var(--display);font-weight:800;font-size:21px}
+.basket{cursor:pointer}.basket .chipA{pointer-events:none}.basket .in{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.basket.bad{animation:shake .35s}
+.cz{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.czc{background:var(--bg);border-radius:20px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;border:3px solid transparent}
+.czc.ok{border-color:var(--can);background:var(--can-soft)}
+.czc .em{font-size:50px;line-height:1.1}
+.czc .t{font-family:var(--display);font-weight:700;font-size:20px}
+.czc .btns{display:flex;gap:8px}
+.czc .btns button{border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:5px 12px;font-family:var(--display);font-weight:800;font-size:17px}
+.czc.ok .btns{display:none}
+.czc .bad{border-color:var(--cant);background:var(--cant-soft);animation:shake .35s}
+.czc .res,.wq .res{font-family:var(--display);font-weight:800;font-size:18px}
+.who{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.wq{background:var(--bg);border-radius:20px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px;border:3px solid transparent}
+.wq.ok{border-color:var(--can);background:var(--can-soft)}
+.wq .t{font-family:var(--display);font-weight:700;font-size:22px}
+.wq .ch{display:flex;gap:8px}
+.wq .big{display:flex;flex-direction:column;align-items:center;font-size:44px;line-height:1.1;border:3px solid var(--line);background:var(--paper);border-radius:16px;padding:6px 8px;min-width:72px}
+.wq .big small{font-size:13px;font-family:var(--body);color:var(--muted)}
+.wq .big.good{border-color:var(--can)}
+.wq .big.bad{border-color:var(--cant);animation:shake .35s}
+.reels{display:flex;gap:14px;align-items:center;justify-content:center}
+.reel{width:min(170px,38vw);aspect-ratio:1;background:var(--bg);border:4px solid var(--cc);border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.reel .em{font-size:clamp(50px,12vw,80px);line-height:1}
+.reel .lb{font-family:var(--display);font-weight:800;font-size:20px}
+.plus{font-family:var(--display);font-weight:800;font-size:40px;color:var(--muted)}
+.spin{background:var(--cc);color:var(--on);border:none;border-radius:99px;padding:10px 28px;font-family:var(--display);font-weight:800;font-size:24px}
+.say{text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(24px,5vw,34px);background:var(--sun-soft);border-radius:18px;padding:12px}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes pop{50%{transform:scale(1.12)}}.pop{animation:pop .3s}
+@media (max-width:520px){.qr{grid-template-columns:44px 1fr;padding:10px}.qr .pic{font-size:32px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="head">
+    <span class="big" aria-hidden="true">🐘☀️🌧️</span>
+    <div><h1>Can and weather</h1><p class="sub">Forward 3 · Unit 8–9 · can / can't · What's the weather like?</p></div>
+  </header>
+  <div class="tools"><span class="stars">⭐ <span id="stars">0</span></span><button class="ghost" id="resetAll" type="button">↺ Начать заново</button></div>
+
+  <section class="st s2">
+    <div class="st-head"><div class="num">!</div><div class="t"><h2>Правило: can</h2><p>Что умеют животные?</p></div></div>
+    <div class="rule">
+      <div class="rbox" style="--rc:var(--can)"><span class="lab">➕ умеет, может</span><span class="ex">Birds <span class="c">can</span> fly.</span></div>
+      <div class="rbox" style="--rc:var(--cant)"><span class="lab">➖ не умеет, не может</span><span class="ex">Elephants <span class="n">can't</span> jump.</span></div>
+      <div class="rbox" style="--rc:var(--blue)"><span class="lab">❓ вопрос и ответ</span><span class="ex"><span class="c">Can</span> birds fly?<br>— Yes, they <span class="c">can</span>.<br>— No, they <span class="n">can't</span>.</span></div>
+    </div>
+    <div class="tip">💡 Если животных много, говорим <b>they</b> — они: Can birds fly? — Yes, <b>they</b> can.</div>
+  </section>
+
+  <section class="st s3">
+    <div class="st-head"><div class="num">1</div><div class="t"><h2>Sort the animals</h2><p>Нажми на животное, потом на корзинку: умеет оно или нет?</p></div></div>
+    <div class="sorttitle" id="sTitle"></div>
+    <div class="pool" id="sPool"></div>
+    <div class="baskets">
+      <div class="basket yes" id="bYes" role="button" tabindex="0"><span class="h" id="hYes"></span><span class="in"></span></div>
+      <div class="basket no" id="bNo" role="button" tabindex="0"><span class="h" id="hNo"></span><span class="in"></span></div>
+    </div>
+    <div class="tools"><span class="done" id="sDone" hidden></span><button class="ghost" id="sNext" type="button" hidden>➡ Следующий раунд</button><span class="sub" id="sRound" style="font-size:15px"></span></div>
+  </section>
+
+  <section class="st s1">
+    <div class="st-head"><div class="num">2</div><div class="t"><h2>True or crazy?</h2><p>Это правда или ерунда? 😄</p></div></div>
+    <div class="cz" id="cz"></div>
+  </section>
+
+  <section class="st s4">
+    <div class="st-head"><div class="num">3</div><div class="t"><h2>Who can do it?</h2><p>Прочитай вопрос и нажми на животное, которое это умеет.</p></div></div>
+    <div class="who" id="who"></div>
+  </section>
+
+  <section class="st s2">
+    <div class="st-head"><div class="num">4</div><div class="t"><h2>Spin and say!</h2><p>Крути барабан! Скажи предложение вслух: <b>A dog <span class="c">can</span> swim.</b> или <b>A fish <span class="n">can't</span> fly.</b> Потом проверь.</p></div></div>
+    <div class="reels"><div class="reel" id="r1"><span class="em">❔</span><span class="lb">animal</span></div><span class="plus">+</span><div class="reel" id="r2"><span class="em">❔</span><span class="lb">action</span></div></div>
+    <div class="tools" style="justify-content:center"><button class="spin" id="spin" type="button">🎰 Spin!</button><button class="ghost" id="check" type="button" disabled>👀 Проверить</button></div>
+    <div class="say" id="sayAns" hidden></div>
+  </section>
+
+  <section class="st s6">
+    <div class="st-head"><div class="num">5</div><div class="t"><h2>And you?</h2><p>Что умеешь ты? Отметь, и внизу получится рассказ. Прочитай его вслух.</p></div></div>
+    <div class="me" id="me"></div>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section class="st s5">
+    <div class="st-head"><div class="num">☀</div><div class="t"><h2>Weather — погода</h2><p>Как говорить о погоде по-английски</p></div></div>
+    <div class="tip" style="font-size:18px;line-height:1.6">
+      Спрашиваем: <b>What's the weather like?</b> — Какая погода?<br>
+      Отвечаем всегда с <b>It's</b> (= it is). Мы говорим «солнечно», «холодно», а англичане — <b>It's</b> sunny, <b>It's</b> cold.<br>
+      Если дождь или снег идёт <b>прямо сейчас</b> — в конце <b>-ing</b>: It's rain<b>ing</b> (идёт дождь), It's snow<b>ing</b> (идёт снег).</div>
+    <div class="wx" id="wx"></div>
+  </section>
+
+  <section class="st s1">
+    <div class="st-head"><div class="num">6</div><div class="t"><h2>Match</h2><p>Нажми на картинку, потом на подходящую фразу.</p></div></div>
+    <div class="match"><div class="mcol" id="mPics"></div><div class="mcol" id="mWords"></div></div>
+    <div class="tools"><span class="done" id="mDone" hidden>Молодец! 🎉</span><button class="ghost" id="mNew" type="button">🔀 Ещё раз</button></div>
+  </section>
+
+  <section class="st s3">
+    <div class="st-head"><div class="num">7</div><div class="t"><h2>What's the weather like?</h2><p>Посмотри на картинку и выбери, какая погода.</p></div></div>
+    <div class="quiz" id="q6"></div>
+  </section>
+
+  <section class="st s2">
+    <div class="st-head"><div class="num">8</div><div class="t"><h2>Can or can't?</h2><p>Можно это делать в такую погоду? Выбери can или can't.</p></div></div>
+    <div class="words"><span><b>snowman</b> — снеговик</span><span><b>kite</b> — воздушный змей</span><span><b>picnic</b> — пикник</span><span><b>today</b> — сегодня</span><span><b>see</b> — видеть</span></div>
+    <div class="quiz" id="q7"></div>
+  </section>
+
+  <section class="st s4">
+    <div class="st-head"><div class="num">9</div><div class="t"><h2>My weather today</h2><p>Посмотри в окно! Выбери погоду и что ты можешь делать. Потом скажи фразу вслух.</p></div></div>
+    <h3>What's the weather like today?</h3>
+    <div class="pick" id="pW"></div>
+    <h3>What can you do?</h3>
+    <div class="pick" id="pA"></div>
+    <div class="story"><span class="s" id="today">Выбери погоду и занятие ☝️</span></div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let stars=0;
+function star(){stars++;$('stars').textContent=stars;const p=$('stars').parentElement;p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop')}
+function shake(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad')}
+function scoreBox(n,again){const s=document.createElement('div');s.className='score';
+  s.innerHTML=`<span>Правильно: <span class="k">0</span> из ${n}</span><span class="bar"><i></i></span><button class="ghost" type="button">↺ Ещё раз</button>`;
+  s.querySelector('button').onclick=again;let ok=0;s.win=()=>{ok++;star();s.querySelector('.k').textContent=ok;s.querySelector('i').style.width=ok/n*100+'%'};return s}
+/* each item: p (pic), parts: array of strings and {o:[..],a:'..'} gaps; h hint */
+function quiz(el,items){
+  el.innerHTML='';const total=items.reduce((n,it)=>n+it.parts.filter(x=>typeof x!=='string').length,0);
+  const sc=scoreBox(total,()=>quiz(el,items));
+  items.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='qr';
+    r.innerHTML=`<div class="pic" aria-hidden="true">${it.p}</div><div class="body"><div class="q"></div><div class="qh" hidden>💡 ${it.h}</div></div>`;
+    const q=r.querySelector('.q'),hint=r.querySelector('.qh');q.append(`${i+1}. `);let left=0;
+    it.parts.forEach(part=>{
+      if(typeof part==='string'){q.append(part);return}
+      left++;const g=document.createElement('span');g.className='grp';
+      (part.mix?shuf(part.o):part.o).forEach(o=>{const b=document.createElement('button');b.type='button';b.className='opt';b.textContent=o;
+        b.onclick=()=>{if(g.classList.contains('done'))return;
+          if(o===part.a){g.classList.add('done');b.classList.add('good');sc.win();if(--left===0)r.classList.add('ok')}
+          else{shake(b);hint.hidden=false}};g.appendChild(b)});
+      q.appendChild(g)});
+    const hb=document.createElement('button');hb.type='button';hb.className='hb';hb.textContent='подсказка';hb.onclick=()=>hint.hidden=!hint.hidden;q.appendChild(hb);
+    el.appendChild(r)});
+  el.appendChild(sc);
+}
+const CC=(a)=>({o:['can',"can't"],a});
+/* 1 sort */
+const ROUNDS=[
+ {v:'fly',em:'🕊️',yes:[['🐦','bird'],['🦜','parrot'],['🦋','butterfly']],no:[['🐘','elephant'],['🐟','fish'],['🐄','cow']]},
+ {v:'swim',em:'🏊',yes:[['🐟','fish'],['🦭','seal'],['🦆','duck'],['🐸','frog']],no:[['🦋','butterfly'],['🐌','snail']]},
+ {v:'jump',em:'🤸',yes:[['🦘','kangaroo'],['🐸','frog'],['🐰','rabbit'],['🐒','monkey']],no:[['🐘','elephant'],['🐟','fish'],['🐌','snail']]}
+];
+let rIdx=0,sSel=null,sLeft=0;
+function sRound(){
+  const R=ROUNDS[rIdx];sSel=null;
+  $('sTitle').innerHTML=`<span>${R.em}</span> Who can <b>${R.v}</b>?`;
+  $('hYes').innerHTML=`✓ <span class="c">can</span> ${R.v}`;$('hNo').innerHTML=`✗ <span class="n">can't</span> ${R.v}`;
+  document.querySelectorAll('.basket .in').forEach(x=>x.innerHTML='');
+  $('sPool').innerHTML='';$('sDone').hidden=true;$('sNext').hidden=true;$('sRound').textContent=`Раунд ${rIdx+1} из ${ROUNDS.length}`;
+  const all=shuf([...R.yes.map(x=>[...x,true]),...R.no.map(x=>[...x,false])]);sLeft=all.length;
+  all.forEach(([em,name,ok])=>{const c=document.createElement('button');c.type='button';c.className='chipA';c.innerHTML=`<span class="e">${em}</span><span class="nm">${name}</span>`;c.dataset.ok=ok;
+    c.onclick=()=>{$('sPool').querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');sSel=c};$('sPool').appendChild(c)});
+}
+function drop(isYes){
+  if(!sSel)return;const ok=sSel.dataset.ok==='true';
+  if(ok===isYes){const t=(isYes?$('bYes'):$('bNo')).querySelector('.in');sSel.classList.remove('sel');sSel.disabled=true;t.appendChild(sSel);sSel=null;star();
+    if(--sLeft===0){const R=ROUNDS[rIdx];$('sDone').hidden=false;$('sDone').innerHTML=`Great! ${R.yes.map(x=>x[0]).join('')} <span class="c">can</span> ${R.v}!`;$('sNext').hidden=false;$('sNext').textContent=rIdx<ROUNDS.length-1?'➡ Следующий раунд':'↺ Сначала'}}
+  else shake(isYes?$('bYes'):$('bNo'));
+}
+$('bYes').onclick=()=>drop(true);$('bNo').onclick=()=>drop(false);
+['bYes','bNo'].forEach(id=>$(id).onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();drop(id==='bYes')}});
+$('sNext').onclick=()=>{rIdx=(rIdx+1)%ROUNDS.length;sRound()};
+
+/* 2 true or crazy */
+const CZ=[['🐄🪽','A cow can fly.',false,"No! A cow can't fly. 😂"],['🐟🌊','A fish can swim.',true,'Yes! A fish can swim.'],
+ ['🐶📚','A dog can read books.',false,"No! A dog can't read books. 😂"],['🐦🎵','A bird can sing.',true,'Yes! A bird can sing.'],
+ ['🐘🤸','An elephant can jump.',false,"No! An elephant can't jump."],['🐒🌳','A monkey can climb trees.',true,'Yes! A monkey can climb trees.'],
+ ['🐱🚴','A cat can ride a bike.',false,"No! A cat can't ride a bike. 😂"],['🐸🤸','A frog can jump.',true,'Yes! A frog can jump.']];
+function buildCZ(){$('cz').innerHTML='';
+  CZ.forEach(([em,t,tr,res])=>{const c=document.createElement('div');c.className='czc';
+    c.innerHTML=`<div class="em">${em}</div><div class="t">${t}</div><div class="btns"><button type="button" class="tb">👍 True</button><button type="button" class="cb">😂 Crazy</button></div><div class="res" hidden>${res.replace("can't",'<span class="n">can\'t</span>').replace(/\bcan\b(?!')/,'<span class="c">can</span>')}</div>`;
+    const pickA=v=>{if(c.classList.contains('ok'))return;if(v===tr){c.classList.add('ok');c.querySelector('.res').hidden=false;star()}else shake(c.querySelector(v?'.tb':'.cb'))};
+    c.querySelector('.tb').onclick=()=>pickA(true);c.querySelector('.cb').onclick=()=>pickA(false);$('cz').appendChild(c)})}
+
+/* 3 who can */
+const WHO=[['fly',['🐘','elephant'],['🦋','butterfly'],['🐟','fish'],1],['swim',['🐬','dolphin'],['🦒','giraffe'],['🐌','snail'],0],
+ ['climb trees',['🐟','fish'],['🐘','elephant'],['🐒','monkey'],2],['jump',['🐌','snail'],['🦘','kangaroo'],['🐢','turtle'],1],
+ ['sing',['🐍','snake'],['🐟','fish'],['🐦','bird'],2],['run',['🐆','cheetah'],['🐟','fish'],['🐌','snail'],0]];
+function buildWho(){$('who').innerHTML='';
+  WHO.forEach(([v,...rest])=>{const ans=rest.pop();const c=document.createElement('div');c.className='wq';
+    c.innerHTML=`<div class="t">Who can <b>${v}</b>?</div><div class="ch"></div><div class="res" hidden></div>`;
+    rest.forEach(([em,nm],i)=>{const b=document.createElement('button');b.type='button';b.className='big';b.innerHTML=`${em}<small>${nm}</small>`;
+      b.onclick=()=>{if(c.classList.contains('ok'))return;if(i===ans){b.classList.add('good');c.classList.add('ok');const r=c.querySelector('.res');r.hidden=false;
+        r.innerHTML=`${/^[aeiou]/.test(nm)?'An':'A'} ${nm} <span class="c">can</span> ${v}!`;star()}else shake(b)};c.querySelector('.ch').appendChild(b)});
+    $('who').appendChild(c)})}
+
+/* 4 spin */
+const AN=[['🐶','dog',['run','swim','jump']],['🐱','cat',['run','jump','climb trees']],['🐦','bird',['fly','sing','jump']],['🐟','fish',['swim']],
+ ['🐘','elephant',['walk','swim','run']],['🐒','monkey',['climb trees','jump','run']],['🐸','frog',['jump','swim']],['🐧','penguin',['swim','walk']],
+ ['🦘','kangaroo',['jump','run']],['🐊','crocodile',['swim','walk']]];
+const VB=[['🕊️','fly'],['🏊','swim'],['🤸','jump'],['🌳','climb trees'],['🎤','sing'],['🏃','run'],['📖','read']];
+let spinA=null,spinV=null,spinning=false;
+$('spin').onclick=()=>{if(spinning)return;spinning=true;$('sayAns').hidden=true;$('check').disabled=true;let n=0;
+  const it=setInterval(()=>{spinA=AN[Math.floor(Math.random()*AN.length)];spinV=VB[Math.floor(Math.random()*VB.length)];
+    $('r1').innerHTML=`<span class="em">${spinA[0]}</span><span class="lb">${spinA[1]}</span>`;$('r2').innerHTML=`<span class="em">${spinV[0]}</span><span class="lb">${spinV[1]}</span>`;
+    if(++n>14){clearInterval(it);spinning=false;$('check').disabled=false}},70)};
+$('check').onclick=()=>{const can=spinA[2].includes(spinV[1]);const art=/^[aeiou]/.test(spinA[1])?'An':'A';
+  $('sayAns').hidden=false;$('sayAns').innerHTML=`${art} ${spinA[1]} ${can?'<span class="c">can</span>':'<span class="n">can\'t</span>'} ${spinV[1]}.`;star()};
+
+/* about me */
+const ME=[['🏊','swim'],['🚴','ride a bike'],['🎤','sing'],['🧗','climb trees'],['⚽','play football'],['💃','dance']];let meAns={};
+function buildMe(){meAns={};$('me').innerHTML='';
+  ME.forEach(([em,w])=>{const d=document.createElement('div');d.className='mi';
+    d.innerHTML=`<span class="em" aria-hidden="true">${em}</span><span class="w">${w}</span><span class="yn"><button class="y" type="button" aria-pressed="false">I can ✓</button><button class="x" type="button" aria-pressed="false">I can't ✗</button></span>`;
+    const y=d.querySelector('.y'),x=d.querySelector('.x');const set=v=>{meAns[w]=v;y.setAttribute('aria-pressed',v);x.setAttribute('aria-pressed',!v);story()};
+    y.onclick=()=>set(true);x.onclick=()=>set(false);$('me').appendChild(d)});story()}
+function story(){const k=ME.map(m=>m[1]).filter(w=>w in meAns);
+  $('story').innerHTML='<h3>My story</h3>'+(k.length?k.map(w=>`<span class="s">I ${meAns[w]?'<span class="c">can</span>':'<span class="n">can\'t</span>'} ${w}.</span>`).join(''):'<span class="empty">Отметь, что ты умеешь, и здесь появятся твои предложения.</span>')}
+/* weather */
+const WX=[['☀️😎','sunny','It\'s hot and sunny.','Жарко и солнечно.'],['❄️☃️','snowing','It\'s snowing.','Идёт снег.'],['🌧️☔','raining','It\'s raining.','Идёт дождь.'],
+ ['💨🍃','windy','It\'s windy.','Ветрено.'],['☁️☁️','cloudy','It\'s cloudy.','Облачно.'],['🥶🧣','cold','It\'s cold.','Холодно.']];
+$('wx').innerHTML=WX.map(([e,k,en,ru])=>`<div class="wc"><div class="em">${e}</div><div class="en">${en}</div><div class="ru">${ru}</div></div>`).join('');
+let sel=null,left=0;
+function newMatch(){const P=$('mPics'),W=$('mWords');P.innerHTML='';W.innerHTML='';sel=null;left=WX.length;$('mDone').hidden=true;
+  shuf(WX).forEach(([e,k])=>{const b=document.createElement('button');b.type='button';b.className='mbtn';b.dataset.k=k;b.innerHTML=`<span class="mem">${e}</span>`;
+    b.onclick=()=>{if(b.classList.contains('done'))return;P.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sel=b};P.appendChild(b)});
+  shuf(WX).forEach(([e,k,en])=>{const b=document.createElement('button');b.type='button';b.className='mbtn';b.textContent=en;
+    b.onclick=()=>{if(b.classList.contains('done')||!sel)return;
+      if(sel.dataset.k===k){[sel,b].forEach(x=>{x.classList.remove('sel');x.classList.add('done')});sel=null;star();if(--left===0)$('mDone').hidden=false}
+      else shake(b)};W.appendChild(b)})}
+$('mNew').onclick=newMatch;
+const WK=WX.map(w=>w[1]);
+const Q6=[['☃️❄️','snowing'],['☁️☁️','cloudy'],['☀️🌻','sunny'],['☔🌧️','raining'],['💨🍃','windy'],['🥶🧣','cold']]
+ .map(([p,a])=>({p,h:'Посмотри на карточки погоды выше.',parts:["It's ",{o:shuf(WK.filter(x=>x!==a)).slice(0,2).concat(a),a,mix:true},'.']}));
+const Q7=[['🌧️⚽',"It's raining. We ","can't",' play football.','Под дождём в футбол не поиграешь.'],
+ ['❄️☃️',"It's snowing. We ",'can',' build a snowman.','Снег идёт — можно лепить снеговика!'],
+ ['💨🪁',"It's windy. I ",'can',' fly my kite.','Ветер — змей полетит!'],
+ ['☀️🧺',"It's hot and sunny. We ",'can',' have a picnic.','Солнце — можно на пикник.'],
+ ['☁️☁️',"It's cloudy. I ","can't",' see the sun.','Облака закрыли солнце.'],
+ ['🥶🏊',"It's cold. I ","can't",' swim today.','Холодно — купаться нельзя.']]
+ .map(([p,a,ans,b,h])=>({p,h,parts:[a,CC(ans),b]}));
+/* today */
+let tw=null,ta=null;
+const ACT=[['⚽','play football'],['☃️','build a snowman'],['🪁','fly my kite'],['🧺','have a picnic'],['🚴','ride a bike'],['📖','read books']];
+function pick(id,list,cb){$(id).innerHTML='';list.forEach(([e,label,val])=>{const b=document.createElement('button');b.type='button';b.className='pk';b.innerHTML=`<span>${e}</span>${label}`;
+  b.onclick=()=>{$(id).querySelectorAll('.pk').forEach(x=>x.setAttribute('aria-pressed',x===b));cb(val)};b.setAttribute('aria-pressed','false');$(id).appendChild(b)})}
+function today(){$('today').innerHTML=(tw?tw+' ':'It\'s … ')+(ta?`I <span class="c">can</span> ${ta}.`:'I can …');if(tw&&ta)star()}
+function buildToday(){tw=ta=null;$('today').textContent='Выбери погоду и занятие ☝️';
+  pick('pW',WX.map(([e,k,en])=>[e,en.replace("It's ",'').replace('.',''),en]),v=>{tw=v;today()});
+  pick('pA',ACT.map(([e,a])=>[e,a,a]),v=>{ta=v;today()})}
+function all(){stars=0;$('stars').textContent=0;rIdx=0;sRound();buildCZ();buildWho();buildMe();newMatch();quiz($('q6'),Q6);quiz($('q7'),Q7);buildToday()}
+$('resetAll').onclick=()=>{all();window.scrollTo({top:0,behavior:'smooth'})};
+all();
+</script>
+
+</body>
+</html>
