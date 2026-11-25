@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Big Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f8ff; --card:#fff; --ink:#26294a; --muted:#6f7392; --line:#e3e6f3;
+  --accent:#5b5bd6; --ok:#2a9d8f; --okbg:#d8f3ec; --bad:#e63946; --badbg:#fde2e4; --sel:#ffd166;
+  --c1:#3a86ff; --c2:#ff5d8f; --c3:#fb8500; --c4:#2a9d8f; --c5:#8338ec;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-size:19px;line-height:1.55}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+header{text-align:center;padding:26px 10px 6px}
+header h1{margin:0;font-size:clamp(32px,7vw,52px);font-weight:900;color:var(--accent)}
+header p{margin:6px 0 0;color:var(--muted)}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 0;border-bottom:2px solid var(--line)}
+nav a{text-decoration:none;color:var(--ink);background:#fff;border:2px solid var(--line);padding:6px 14px;border-radius:999px;font-weight:700;font-size:15px}
+nav a:hover{border-color:var(--ink)}
+h2{font-size:34px;font-weight:900;margin:46px 0 8px;color:var(--accent)}
+h3{margin:0 0 4px;font-size:22px}
+.card,.ex{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:20px;margin:18px 0;box-shadow:0 4px 0 var(--line)}
+.task{color:var(--muted);margin:0 0 12px;font-size:16px}
+.num{display:inline-block;background:var(--accent);color:#fff;border-radius:8px;padding:0 9px;margin-right:6px}
+.tip{background:#fff4d6;border-radius:12px;padding:10px 14px;margin-top:12px;font-size:17px}
+table.t{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:18px}
+table.t th,table.t td{border:2px solid var(--line);padding:8px;text-align:center}
+table.t th{background:#eef0fb}
+table.t td:first-child{font-weight:700}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.mini div{background:#f3f4fc;border-radius:12px;padding:8px 12px;font-size:17px}
+.mini b{font-size:20px}
+ol.items{padding-left:26px;margin:0}
+ol.items li{margin:12px 0}
+/* gaps */
+.gap{display:inline-block;min-width:80px;padding:0 10px;border-bottom:3px dashed var(--muted);color:var(--muted);text-align:center;cursor:pointer;border-radius:8px 8px 0 0;font-weight:700;user-select:none}
+.gap:hover{background:#eef0fb}
+.gap.filled{color:var(--ink);background:#e7ecff;border-bottom-color:var(--c1)}
+.gap.ok{background:var(--okbg);border-bottom-color:var(--ok);color:var(--ok)}
+.gap.bad{background:var(--badbg);border-bottom-color:var(--bad);color:var(--bad)}
+.gap.in{min-width:46px}
+.menu{position:absolute;display:none;flex-direction:column;background:#fff;border:2px solid var(--ink);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:50;overflow:hidden}
+.menu button{font-family:inherit;font-size:18px;font-weight:700;border:none;background:#fff;padding:8px 18px;text-align:left;cursor:pointer;color:var(--ink)}
+.menu button:hover{background:var(--sel)}
+/* controls */
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.btn{font-family:inherit;font-size:16px;font-weight:700;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:8px 18px;border-radius:999px;cursor:pointer}
+.btn:hover{background:var(--ink);color:#fff}
+.btn.main{background:var(--accent);border-color:var(--accent);color:#fff}
+.res{font-weight:900;font-size:18px}
+/* chips */
+.chip{display:inline-block;background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px 14px;margin:4px;font-weight:700;cursor:pointer;user-select:none;transition:.12s}
+.chip:hover{border-color:var(--ink);transform:translateY(-2px)}
+.chip.sel{background:var(--sel);border-color:#e0a800}
+.chip.ok{background:var(--okbg);border-color:var(--ok)}
+.chip.bad{background:var(--badbg);border-color:var(--bad)}
+.chip.done{background:var(--okbg);border-color:var(--ok);cursor:default;opacity:.8}
+.chip.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.match .col{display:flex;flex-direction:column;gap:6px}
+.match .chip{margin:0;text-align:center}
+.match .big{font-size:26px}
+.pool{min-height:60px;border:2px dashed var(--line);border-radius:14px;padding:8px;margin-bottom:12px;cursor:pointer}
+.cols{display:grid;gap:10px}
+.zone{min-height:140px;border:3px solid;border-radius:14px;padding:8px;cursor:pointer}
+.zone .lbl{font-weight:900;font-size:20px;margin:0 0 6px 4px}
+@media(max-width:700px){.cols{grid-template-columns:1fr 1fr!important}}
+.rows{display:flex;flex-direction:column;gap:10px}
+.rows .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rows .row .chip{font-size:19px}
+.rows .hint{font-size:15px;color:var(--ok);font-weight:700;width:100%;padding-left:28px}
+.order{border:2px solid var(--line);border-radius:14px;padding:10px;margin:10px 0}
+.line{min-height:52px;border-bottom:3px solid var(--ink);margin-bottom:8px;padding:2px}
+.line.ok{background:var(--okbg)}.line.bad{background:var(--badbg)}
+.endmark{font-weight:900;font-size:22px}
+.toggle .chip.has{background:var(--okbg);border-color:var(--ok)}
+.toggle .chip.no{background:var(--badbg);border-color:var(--bad)}
+.out p{margin:4px 0;font-size:20px}
+.nums{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.nums div{background:#f3f4fc;border-radius:10px;padding:6px 10px;font-size:17px}
+.nums b{color:var(--accent);font-size:20px;margin-right:6px}
+#total{position:fixed;right:14px;bottom:14px;background:var(--accent);color:#fff;font-weight:900;padding:10px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:20;font-size:17px}
+footer{text-align:center;color:var(--muted);font-size:14px;padding:30px 0 70px}
+</style>
+</head>
+<body>
+<header>
+  <h1>⭐ Big Review ⭐</h1>
+  <p>Повторяем: звуки и правила чтения · to be · have got · школьные предметы · числа 1–20<br>Всё решается мышкой: кликай по пропускам и словам</p>
+</header>
+<nav>
+  <a href="#sounds">🔤 Звуки</a><a href="#tobe">🧍 to be</a><a href="#havegot">🎒 have got</a><a href="#subjects">📚 Subjects</a><a href="#numbers">🔢 Numbers</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ================= SOUNDS ================= -->
+<section id="sounds">
+  <h2>🔤 Звуки и правила чтения</h2>
+  <div class="card">
+    <h3>Вспомни!</h3>
+    <div class="mini">
+      <div><b>sh</b> = [ʃ] ship</div><div><b>ch, tch</b> = [tʃ] chair, watch</div><div><b>th</b> = [θ] three / [ð] this</div><div><b>ph</b> = [f] phone</div><div><b>ck</b> = [k] duck</div>
+      <div><b>ee</b> = [iː] tree</div><div><b>ea</b> = [iː] tea <small>(иногда [e] bread)</small></div><div><b>oo</b> = [uː] moon / [ʊ] book</div><div><b>ay</b> = [eɪ] day</div>
+    </div>
+    <div class="tip">📖 <b>Открытый слог</b> (гласная на конце или немая e): гласная читается как в алфавите — <i>cake, bike, home, cute, he, my</i>.<br>
+    📕 <b>Закрытый слог</b> (после гласной согласная): гласная короткая — <i>cat, pig, dog, cup, pen, gym</i>.<br>
+    🦊 <b>Y</b>: в начале «й» (<i>yes</i>), в конце короткого слова «ай» (<i>my</i>), в конце длинного «и» (<i>happy</i>).</div>
+  </div>
+
+  <section class="ex" id="s1" data-type="sort">
+    <h3><span class="num">1</span>Sort the words: sh, ch, th, ck or ph?</h3>
+    <p class="task">Нажми на слово, потом на нужную колонку.</p>
+  </section>
+
+  <section class="ex" id="s2" data-type="odd">
+    <h3><span class="num">2</span>Find the odd one out.</h3>
+    <p class="task">В каждой строчке одно слово читается по-другому. Найди его!</p>
+  </section>
+
+  <section class="ex" id="s3" data-type="sort">
+    <h3><span class="num">3</span>Open or closed syllable?</h3>
+    <p class="task">Открытый слог — гласная «по алфавиту». Закрытый — короткая.</p>
+  </section>
+
+  <section class="ex" id="s4" data-type="sort">
+    <h3><span class="num">4</span>How do we read Y?</h3>
+    <p class="task">Разложи слова по звуку буквы Y.</p>
+  </section>
+
+  <section class="ex" id="s5" data-type="gaps">
+    <h3><span class="num">5</span>ck or k?</h3>
+    <p class="task">Короткая гласная → <b>ck</b>. Гласная «по алфавиту» → <b>k</b>.</p>
+    <ol class="items">
+      <li>ba<span class="gap in" data-a="ck" data-o="ck|k"></span></li>
+      <li>ca<span class="gap in" data-a="k" data-o="ck|k"></span>e</li>
+      <li>du<span class="gap in" data-a="ck" data-o="ck|k"></span></li>
+      <li>bi<span class="gap in" data-a="k" data-o="ck|k"></span>e</li>
+      <li>so<span class="gap in" data-a="ck" data-o="ck|k"></span></li>
+      <li>smo<span class="gap in" data-a="k" data-o="ck|k"></span>e</li>
+      <li>ne<span class="gap in" data-a="ck" data-o="ck|k"></span></li>
+      <li>bla<span class="gap in" data-a="ck" data-o="ck|k"></span></li>
+    </ol>
+  </section>
+</section>
+
+<!-- ================= TO BE ================= -->
+<section id="tobe">
+  <h2>🧍 Глагол to be</h2>
+  <div class="card">
+    <table class="t">
+      <tr><th></th><th>✅</th><th>❌</th><th>❓</th></tr>
+      <tr><td>I</td><td>I <b>am</b> ('m)</td><td>I<b>'m not</b></td><td><b>Am</b> I …?</td></tr>
+      <tr><td>he, she, it</td><td>he <b>is</b> ('s)</td><td>he <b>isn't</b></td><td><b>Is</b> he …?</td></tr>
+      <tr><td>we, you, they</td><td>we <b>are</b> ('re)</td><td>we <b>aren't</b></td><td><b>Are</b> we …?</td></tr>
+    </table>
+    <p style="margin:0"><b>Краткие ответы:</b> <i>Are you ten?</i> — Yes, I am. / No, I'm not. · <i>Is she English?</i> — Yes, she is. / No, she isn't.</p>
+    <div class="tip">🔑 <b>Tom, my mum, the cat</b> = he / she / it → <b>is</b>. <b>Tom and Ann, my friends</b> = they → <b>are</b>.</div>
+  </div>
+
+  <section class="ex" id="b1" data-type="gaps">
+    <h3><span class="num">6</span>am, is or are?</h3>
+    <ol class="items">
+      <li>I <span class="gap" data-a="am" data-o="am|is|are"></span> a pupil.</li>
+      <li>My mum <span class="gap" data-a="is" data-o="am|is|are"></span> a teacher.</li>
+      <li>We <span class="gap" data-a="are" data-o="am|is|are"></span> friends.</li>
+      <li>It <span class="gap" data-a="is" data-o="am|is|are"></span> a cat.</li>
+      <li>Tom and Ann <span class="gap" data-a="are" data-o="am|is|are"></span> from Russia.</li>
+      <li>My school bag <span class="gap" data-a="is" data-o="am|is|are"></span> new.</li>
+      <li>They <span class="gap" data-a="are" data-o="am|is|are"></span> eleven.</li>
+      <li>You <span class="gap" data-a="are" data-o="am|is|are"></span> my best friend.</li>
+    </ol>
+  </section>
+
+  <section class="ex" id="b2" data-type="gaps">
+    <h3><span class="num">7</span>'m not, isn't or aren't?</h3>
+    <ol class="items">
+      <li>I <span class="gap" data-a="'m not" data-o="'m not|isn't|aren't"></span> ten.</li>
+      <li>She <span class="gap" data-a="isn't" data-o="'m not|isn't|aren't"></span> English.</li>
+      <li>They <span class="gap" data-a="aren't" data-o="'m not|isn't|aren't"></span> at school.</li>
+      <li>It <span class="gap" data-a="isn't" data-o="'m not|isn't|aren't"></span> a dog.</li>
+      <li>We <span class="gap" data-a="aren't" data-o="'m not|isn't|aren't"></span> in class 5A.</li>
+      <li>My pencil <span class="gap" data-a="isn't" data-o="'m not|isn't|aren't"></span> red.</li>
+    </ol>
+  </section>
+
+  <section class="ex" id="b3" data-type="gaps">
+    <h3><span class="num">8</span>Questions and short answers.</h3>
+    <ol class="items">
+      <li><span class="gap" data-a="Is" data-o="Am|Is|Are"></span> she your sister? — Yes, <span class="gap" data-a="she is." data-o="she is.|she isn't.|she are."></span></li>
+      <li><span class="gap" data-a="Are" data-o="Am|Is|Are"></span> you twelve? — No, <span class="gap" data-a="I'm not." data-o="I'm not.|I amn't.|I isn't."></span></li>
+      <li><span class="gap" data-a="Is" data-o="Am|Is|Are"></span> it a ruler? — Yes, <span class="gap" data-a="it is." data-o="it's.|it is.|it are."></span></li>
+      <li><span class="gap" data-a="Are" data-o="Am|Is|Are"></span> they from Italy? — No, <span class="gap" data-a="they aren't." data-o="they isn't.|they aren't.|they not."></span></li>
+      <li><span class="gap" data-a="Am" data-o="Am|Is|Are"></span> I late? — No, <span class="gap" data-a="you aren't." data-o="I'm not.|you aren't.|you isn't."></span></li>
+    </ol>
+  </section>
+
+  <section class="ex" id="b4" data-type="order">
+    <h3><span class="num">9</span>Put the words in the correct order.</h3>
+    <p class="task">Нажимай на слова по порядку. Ошибся — нажми на слово в строчке, и оно вернётся.</p>
+  </section>
+</section>
+
+<!-- ================= HAVE GOT ================= -->
+<section id="havegot">
+  <h2>🎒 have got / has got</h2>
+  <div class="card">
+    <table class="t">
+      <tr><th></th><th>✅</th><th>❌</th><th>❓</th></tr>
+      <tr><td>I, you, we, they</td><td><b>have got</b></td><td><b>haven't got</b></td><td><b>Have</b> you <b>got</b> …?</td></tr>
+      <tr><td>he, she, it</td><td><b>has got</b></td><td><b>hasn't got</b></td><td><b>Has</b> she <b>got</b> …?</td></tr>
+    </table>
+    <div class="tip">⚠️ В кратком ответе без got: <i>Yes, I have. · No, she hasn't.</i></div>
+  </div>
+
+  <section class="ex" id="g1" data-type="gaps">
+    <h3><span class="num">10</span>have got or has got?</h3>
+    <ol class="items">
+      <li>I <span class="gap" data-a="have got" data-o="have got|has got"></span> a new pen.</li>
+      <li>My brother <span class="gap" data-a="has got" data-o="have got|has got"></span> a bike.</li>
+      <li>We <span class="gap" data-a="have got" data-o="have got|has got"></span> English on Monday.</li>
+      <li>The cat <span class="gap" data-a="has got" data-o="have got|has got"></span> green eyes.</li>
+      <li>Ann and Kate <span class="gap" data-a="have got" data-o="have got|has got"></span> a dog.</li>
+      <li>She <span class="gap" data-a="has got" data-o="have got|has got"></span> a pencil case.</li>
+    </ol>
+  </section>
+
+  <section class="ex" id="g2" data-type="gaps">
+    <h3><span class="num">11</span>Make it negative.</h3>
+    <ol class="items">
+      <li>He's got a ruler. → He <span class="gap" data-a="hasn't got" data-o="hasn't got|haven't got|isn't got"></span> a ruler.</li>
+      <li>We've got a cat. → We <span class="gap" data-a="haven't got" data-o="hasn't got|haven't got|aren't got"></span> a cat.</li>
+      <li>My mum has got a car. → My mum <span class="gap" data-a="hasn't got" data-o="hasn't got|haven't got|isn't got"></span> a car.</li>
+      <li>They've got an atlas. → They <span class="gap" data-a="haven't got" data-o="hasn't got|haven't got|don't got"></span> an atlas.</li>
+    </ol>
+  </section>
+
+  <section class="ex" id="g3" data-type="gaps">
+    <h3><span class="num">12</span>Have or Has? Choose the short answer.</h3>
+    <ol class="items">
+      <li><span class="gap" data-a="Have" data-o="Have|Has"></span> you got a rubber? (✓) — <span class="gap" data-a="Yes, I have." data-o="Yes, I have.|Yes, I have got.|Yes, I has."></span></li>
+      <li><span class="gap" data-a="Has" data-o="Have|Has"></span> Tom got a brother? (✗) — <span class="gap" data-a="No, he hasn't." data-o="No, he haven't.|No, he hasn't.|No, he isn't."></span></li>
+      <li><span class="gap" data-a="Have" data-o="Have|Has"></span> they got a notebook? (✓) — <span class="gap" data-a="Yes, they have." data-o="Yes, they has.|Yes, they have.|Yes, they are."></span></li>
+      <li><span class="gap" data-a="Has" data-o="Have|Has"></span> your sister got a phone? (✗) — <span class="gap" data-a="No, she hasn't." data-o="No, she hasn't.|No, she hasn't got.|No, she haven't."></span></li>
+    </ol>
+  </section>
+
+  <section class="ex" id="g4" data-type="choose">
+    <h3><span class="num">13</span>Which sentence is correct?</h3>
+    <p class="task">Нажми на правильное предложение.</p>
+  </section>
+</section>
+
+<!-- ================= SUBJECTS ================= -->
+<section id="subjects">
+  <h2>📚 School subjects</h2>
+  <div class="card">
+    <div class="mini">
+      <div>🔤 <b>English</b></div><div>🪆 <b>Russian</b></div><div>➗ <b>Maths</b></div><div>🔬 <b>Science</b></div><div>🏛️ <b>History</b></div>
+      <div>🗺️ <b>Geography</b></div><div>🎨 <b>Art</b></div><div>🎵 <b>Music</b></div><div>⚽ <b>PE</b></div><div>💻 <b>IT</b></div><div>📕 <b>Literature</b></div>
+    </div>
+    <div class="tip">✍️ Названия предметов пишем <b>с большой буквы</b>. <b>PE</b> — физкультура, <b>IT</b> — информатика.</div>
+  </div>
+
+  <section class="ex" id="sub1" data-type="match">
+    <h3><span class="num">14</span>Match the picture and the subject.</h3>
+    <p class="task">Нажми на картинку, потом на предмет.</p>
+  </section>
+
+  <section class="ex" id="sub2" data-type="gaps">
+    <h3><span class="num">15</span>What subject is it?</h3>
+    <ol class="items">
+      <li>We draw pictures in <span class="gap" data-a="Art" data-o="Music|Art|Maths"></span>.</li>
+      <li>We sing songs in <span class="gap" data-a="Music" data-o="Music|IT|History"></span>.</li>
+      <li>We count numbers in <span class="gap" data-a="Maths" data-o="PE|Geography|Maths"></span>.</li>
+      <li>We play football in <span class="gap" data-a="PE" data-o="PE|Art|Science"></span>.</li>
+      <li>We use computers in <span class="gap" data-a="IT" data-o="Music|IT|Literature"></span>.</li>
+      <li>We learn about maps and countries in <span class="gap" data-a="Geography" data-o="History|Geography|English"></span>.</li>
+      <li>We learn about the past in <span class="gap" data-a="History" data-o="Science|Maths|History"></span>.</li>
+      <li>We read books and poems in <span class="gap" data-a="Literature" data-o="Literature|PE|IT"></span>.</li>
+    </ol>
+  </section>
+
+  <section class="ex" id="sub3">
+    <h3><span class="num">16</span>What do you like?</h3>
+    <p class="task">Один клик — 👍 нравится, второй — 👎 не нравится, третий — сбросить. Прочитай предложения вслух!</p>
+    <div class="toggle" id="likeBox"></div>
+    <div class="out" id="likeOut" style="margin-top:12px"></div>
+  </section>
+</section>
+
+<!-- ================= NUMBERS ================= -->
+<section id="numbers">
+  <h2>🔢 Numbers 1–20</h2>
+  <div class="card">
+    <div class="nums" id="numList"></div>
+    <div class="tip">🔑 13–19 заканчиваются на <b>-teen</b>. Будь внимателен: <b>three → thirteen</b>, <b>five → fifteen</b>, <b>eight → eighteen</b> (одна t!).</div>
+  </div>
+
+  <section class="ex" id="n1" data-type="match">
+    <h3><span class="num">17</span>Match the number and the word.</h3>
+    <p class="task">Нажми на цифру, потом на слово.</p>
+  </section>
+
+  <section class="ex" id="n2" data-type="gaps">
+    <h3><span class="num">18</span>Count!</h3>
+    <ol class="items">
+      <li>7 + 5 = <span class="gap" data-a="twelve" data-o="eleven|twelve|twenty"></span></li>
+      <li>10 + 3 = <span class="gap" data-a="thirteen" data-o="thirty|three|thirteen"></span></li>
+      <li>20 − 6 = <span class="gap" data-a="fourteen" data-o="fourteen|forty|four"></span></li>
+      <li>9 + 8 = <span class="gap" data-a="seventeen" data-o="seven|seventeen|sixteen"></span></li>
+      <li>4 + 7 = <span class="gap" data-a="eleven" data-o="eleven|twelve|eight"></span></li>
+      <li>15 + 5 = <span class="gap" data-a="twenty" data-o="twelve|ten|twenty"></span></li>
+      <li>6 + 10 = <span class="gap" data-a="sixteen" data-o="sixteen|six|sixty"></span></li>
+      <li>9 + 9 = <span class="gap" data-a="eighteen" data-o="eighteen|eighty|nineteen"></span></li>
+    </ol>
+  </section>
+
+  <section class="ex" id="n3" data-type="choose">
+    <h3><span class="num">19</span>Choose the correct spelling.</h3>
+    <p class="task">Нажми на слово, написанное правильно.</p>
+  </section>
+</section>
+
+<footer>🏆 Well done! Посчитай свои звёзды внизу справа.</footer>
+</div>
+
+<div class="menu" id="menu"></div>
+<div id="total">⭐ 0</div>
+
+<script>
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const PH='…………';
+const COLORS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)'];
+
+/* ---------- DATA ---------- */
+const DATA={
+  s1:{zones:[['sh','sh'],['ch','ch'],['th','th'],['ck','ck'],['ph','ph']],
+      items:[['ship','sh'],['fish','sh'],['shop','sh'],['chair','ch'],['lunch','ch'],['watch','ch'],['cheese','ch'],['think','th'],['mother','th'],['three','th'],['duck','ck'],['clock','ck'],['black','ck'],['phone','ph'],['dolphin','ph'],['photo','ph']]},
+  s2:{rows:[[['moon','food','room','tree'],3,'tree — ee [iː], остальные oo [uː]'],
+            [['see','green','sheep','day'],3,'day — ay [eɪ], остальные ee [iː]'],
+            [['tea','eat','play','sea'],2,'play — ay [eɪ], остальные ea [iː]'],
+            [['book','look','moon','good'],2,'moon — долгое [uː], остальные короткое [ʊ]'],
+            [['bread','tea','eat','sea'],0,'bread — здесь ea читается [e]'],
+            [['ship','shop','chip','shell'],2,'chip — ch [tʃ], остальные sh [ʃ]'],
+            [['think','three','bath','this'],3,'this — звонкий [ð], остальные глухой [θ]'],
+            [['cake','bike','cat','home'],2,'cat — закрытый слог, остальные открытые']]},
+  s3:{zones:[['📖 открытый','o'],['📕 закрытый','c']],
+      items:[['cake','o'],['cat','c'],['bike','o'],['pig','c'],['home','o'],['dog','c'],['cute','o'],['cup','c'],['he','o'],['pen','c'],['five','o'],['sock','c'],['rose','o'],['bus','c']]},
+  s4:{zones:[['«й» yes','j'],['«ай» my','ai'],['«и» happy','i']],
+      items:[['yes','j'],['yellow','j'],['you','j'],['young','j'],['my','ai'],['fly','ai'],['sky','ai'],['why','ai'],['happy','i'],['baby','i'],['funny','i'],['family','i']]},
+  b4:{items:[['Is your teacher nice','?'],["We aren't at home",'.'],['Are you in class 5B','?'],['My name is Anna','.'],["He isn't my brother",'.']]},
+  g4:{rows:[['She has got a cat.','She have got a cat.'],['Have you got a pen? — Yes, I have.','Have you got a pen? — Yes, I have got.'],['They have got a big house.','They has got a big house.'],["He hasn't got a bike.","He haven't got a bike."],['Has Tom got a dog?','Have Tom got a dog?']]},
+  sub1:{big:true,pairs:[['🎨','Art'],['➗','Maths'],['🎵','Music'],['🔬','Science'],['🏛️','History'],['🗺️','Geography'],['⚽','PE'],['💻','IT'],['🔤','English'],['🪆','Russian']]},
+  n1:{big:true,pairs:[['3','three'],['5','five'],['8','eight'],['11','eleven'],['12','twelve'],['13','thirteen'],['15','fifteen'],['18','eighteen'],['19','nineteen'],['20','twenty']]},
+  n3:{rows:[['twelve','twelf'],['fifteen','fiveteen'],['eighteen','eightteen'],['fourteen','forteen'],['nineteen','ninteen'],['thirteen','threeteen'],['twenty','twenteen']]}
+};
+
+/* ---------- total stars ---------- */
+const scores={};
+function setScore(id,v){scores[id]=v;let s=0;for(const k in scores)s+=scores[k];document.getElementById('total').textContent='⭐ '+s;}
+
+/* ---------- shell: add controls ---------- */
+document.querySelectorAll('.ex[data-type]').forEach(ex=>{
+  const t=ex.dataset.type;
+  const body=document.createElement('div'); body.className='body';
+  if(t!=='gaps') ex.appendChild(body);
+  const c=document.createElement('div'); c.className='ctrl';
+  const needCheck = (t==='gaps'||t==='sort'||t==='order');
+  c.innerHTML=(needCheck?'<button class="btn main check">Проверить</button>':'')+'<button class="btn reset">Заново</button><span class="res"></span>';
+  ex.appendChild(c);
+});
+function result(ex,ok,total){
+  const r=ex.querySelector('.res');
+  r.textContent=(ok===total?'🎉 Отлично! ':'')+ok+' из '+total;
+  r.style.color=ok===total?'var(--ok)':'var(--ink)';
+  setScore(ex.id,ok);
+}
+function clearRes(ex){ex.querySelector('.res').textContent='';}
+
+/* ---------- GAPS ---------- */
+const menu=document.getElementById('menu'); let activeGap=null;
+document.querySelectorAll('.gap').forEach(g=>g.textContent=PH);
+function openMenu(g){
+  activeGap=g; menu.innerHTML='';
+  g.dataset.o.split('|').forEach(o=>{const b=document.createElement('button');b.textContent=o;menu.appendChild(b);});
+  menu.style.display='flex';
+  const r=g.getBoundingClientRect(), w=menu.offsetWidth, vw=document.documentElement.clientWidth;
+  let left=r.left+window.scrollX; if(left+w>window.scrollX+vw-8) left=window.scrollX+vw-w-8;
+  menu.style.left=Math.max(8,left)+'px'; menu.style.top=(r.bottom+window.scrollY+6)+'px';
+}
+function closeMenu(){menu.style.display='none';activeGap=null;}
+document.addEventListener('click',e=>{
+  const g=e.target.closest('.gap');
+  if(g){e.stopPropagation(); if(activeGap===g){closeMenu();return;} openMenu(g); return;}
+  const o=e.target.closest('#menu button');
+  if(o&&activeGap){activeGap.textContent=o.textContent;activeGap.dataset.v=o.textContent;activeGap.className='gap filled'+(activeGap.classList.contains('in')?' in':'');const ex=activeGap.closest('.ex');if(ex)clearRes(ex);closeMenu();return;}
+  closeMenu();
+});
+function gapCls(g,c){return 'gap '+c+(g.classList.contains('in')?' in':'');}
+function checkGaps(ex){let ok=0;const gs=ex.querySelectorAll('.gap');gs.forEach(g=>{if(g.dataset.v===g.dataset.a){ok++;g.className=gapCls(g,'ok');}else g.className=gapCls(g,'bad');});result(ex,ok,gs.length);}
+function resetGaps(ex){ex.querySelectorAll('.gap').forEach(g=>{g.textContent=PH;delete g.dataset.v;g.className=gapCls(g,'');});clearRes(ex);setScore(ex.id,0);}
+
+/* ---------- MATCH ---------- */
+function initMatch(ex){
+  const d=DATA[ex.id], body=ex.querySelector('.body'); clearRes(ex); setScore(ex.id,0);
+  body.innerHTML='<div class="match"><div class="col L"></div><div class="col R"></div></div>';
+  const L=body.querySelector('.L'),R=body.querySelector('.R'); let selL=null,done=0;
+  shuffle(d.pairs).forEach(([a,b])=>{const s=document.createElement('span');s.className='chip'+(d.big?' big':'');s.textContent=a;s.dataset.k=b;L.appendChild(s);
+    s.onclick=()=>{if(s.classList.contains('done'))return;L.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));s.classList.add('sel');selL=s;};});
+  shuffle(d.pairs).forEach(([a,b])=>{const s=document.createElement('span');s.className='chip';s.textContent=b;R.appendChild(s);
+    s.onclick=()=>{if(s.classList.contains('done')||!selL)return;
+      if(selL.dataset.k===b){selL.className='chip done'+(d.big?' big':'');s.className='chip done';selL=null;done++;result(ex,done,d.pairs.length);}
+      else{s.classList.add('bad','shake');setTimeout(()=>s.classList.remove('bad','shake'),400);}};});
+}
+
+/* ---------- SORT ---------- */
+function initSort(ex){
+  const d=DATA[ex.id], body=ex.querySelector('.body'); clearRes(ex); setScore(ex.id,0);
+  body.innerHTML='<div class="pool"></div><div class="cols" style="grid-template-columns:repeat('+d.zones.length+',1fr)"></div>';
+  const pool=body.querySelector('.pool'), cols=body.querySelector('.cols'); let sel=null;
+  d.zones.forEach(([lbl,z],i)=>{const zd=document.createElement('div');zd.className='zone';zd.dataset.z=z;zd.style.borderColor=COLORS[i%5];zd.innerHTML='<div class="lbl" style="color:'+COLORS[i%5]+'">'+lbl+'</div>';cols.appendChild(zd);});
+  shuffle(d.items).forEach(([w,z])=>{const s=document.createElement('span');s.className='chip';s.textContent=w;s.dataset.z=z;pool.appendChild(s);
+    s.onclick=e=>{e.stopPropagation();body.querySelectorAll('.chip').forEach(x=>x.classList.remove('ok','bad'));
+      if(sel===s){s.classList.remove('sel');sel=null;return;}
+      body.querySelectorAll('.chip.sel').forEach(x=>x.classList.remove('sel'));s.classList.add('sel');sel=s;};});
+  [pool,...cols.children].forEach(z=>z.onclick=()=>{if(!sel)return;z.appendChild(sel);sel.classList.remove('sel');sel=null;clearRes(ex);});
+}
+function checkSort(ex){
+  const d=DATA[ex.id]; let ok=0;
+  ex.querySelectorAll('.zone').forEach(z=>z.querySelectorAll('.chip').forEach(c=>{if(c.dataset.z===z.dataset.z){ok++;c.classList.add('ok');}else c.classList.add('bad');}));
+  result(ex,ok,d.items.length);
+  const left=ex.querySelectorAll('.pool .chip').length; if(left) ex.querySelector('.res').textContent+=' · осталось: '+left;
+}
+
+/* ---------- ODD ONE OUT ---------- */
+function initOdd(ex){
+  const d=DATA[ex.id], body=ex.querySelector('.body'); clearRes(ex); setScore(ex.id,0);
+  body.innerHTML='<div class="rows"></div>'; const box=body.firstChild; let done=0;
+  d.rows.forEach(([words,odd,hint],i)=>{
+    const row=document.createElement('div');row.className='row';row.innerHTML='<b>'+(i+1)+'.</b>';
+    words.forEach((w,j)=>{const s=document.createElement('span');s.className='chip';s.textContent=w;
+      s.onclick=()=>{if(row.dataset.d)return;
+        if(j===odd){s.className='chip ok';row.dataset.d=1;done++;const h=document.createElement('div');h.className='hint';h.textContent='✔ '+hint;row.appendChild(h);result(ex,done,d.rows.length);}
+        else{s.classList.add('bad','shake');setTimeout(()=>s.classList.remove('bad','shake'),400);}};
+      row.appendChild(s);});
+    box.appendChild(row);});
+}
+
+/* ---------- CHOOSE CORRECT ---------- */
+function initChoose(ex){
+  const d=DATA[ex.id], body=ex.querySelector('.body'); clearRes(ex); setScore(ex.id,0);
+  body.innerHTML='<div class="rows"></div>'; const box=body.firstChild; let done=0;
+  d.rows.forEach(([good,bad],i)=>{
+    const row=document.createElement('div');row.className='row';row.innerHTML='<b>'+(i+1)+'.</b>';
+    shuffle([[good,1],[bad,0]]).forEach(([t,isOk])=>{const s=document.createElement('span');s.className='chip';s.textContent=t;
+      s.onclick=()=>{if(row.dataset.d)return;
+        if(isOk){s.className='chip ok';row.dataset.d=1;done++;result(ex,done,d.rows.length);}
+        else{s.classList.add('bad','shake');setTimeout(()=>s.classList.remove('shake'),400);}};
+      row.appendChild(s);});
+    box.appendChild(row);});
+}
+
+/* ---------- ORDER ---------- */
+function initOrder(ex){
+  const d=DATA[ex.id], body=ex.querySelector('.body'); clearRes(ex); setScore(ex.id,0); body.innerHTML='';
+  d.items.forEach(([ans,end],i)=>{
+    const o=document.createElement('div');o.className='order';o.dataset.a=ans;
+    o.innerHTML='<b>'+(i+1)+'.</b><div class="line"></div><div class="src"></div>';
+    const line=o.querySelector('.line'),src=o.querySelector('.src');
+    const em=document.createElement('span');em.className='endmark';em.textContent=end;
+    const words=ans.split(' ');let sh=shuffle(words);while(sh.join(' ')===ans&&words.length>1)sh=shuffle(words);
+    sh.forEach(w=>{const s=document.createElement('span');s.className='chip';s.textContent=w;
+      s.onclick=()=>{line.classList.remove('ok','bad');if(s.parentNode===src)line.insertBefore(s,em);else src.appendChild(s);clearRes(ex);};
+      src.appendChild(s);});
+    line.appendChild(em); body.appendChild(o);});
+}
+function checkOrder(ex){
+  let ok=0;const os=ex.querySelectorAll('.order');
+  os.forEach(o=>{const line=o.querySelector('.line');const got=[...line.querySelectorAll('.chip')].map(c=>c.textContent).join(' ');
+    if(got===o.dataset.a){ok++;line.className='line ok';}else line.className='line bad';});
+  result(ex,ok,os.length);
+}
+
+/* ---------- wire up ---------- */
+const H={gaps:{check:checkGaps,reset:resetGaps},match:{reset:initMatch},sort:{check:checkSort,reset:initSort},odd:{reset:initOdd},choose:{reset:initChoose},order:{check:checkOrder,reset:initOrder}};
+document.querySelectorAll('.ex[data-type]').forEach(ex=>{
+  const h=H[ex.dataset.type];
+  const c=ex.querySelector('.check'); if(c) c.onclick=()=>h.check(ex);
+  ex.querySelector('.reset').onclick=()=>h.reset(ex);
+  if(ex.dataset.type!=='gaps') h.reset(ex);
+});
+
+/* ---------- likes ---------- */
+(function(){
+  const subs=['English','Russian','Maths','Science','History','Geography','Art','Music','PE','IT','Literature'];
+  const box=document.getElementById('likeBox'),out=document.getElementById('likeOut');
+  subs.forEach(sb=>{const s=document.createElement('span');s.className='chip';s.textContent=sb;s.dataset.st='0';
+    s.onclick=()=>{const st=(+s.dataset.st+1)%3;s.dataset.st=st;s.className='chip'+(st===1?' has':st===2?' no':'');s.textContent=(st===1?'👍 ':st===2?'👎 ':'')+sb;render();};
+    box.appendChild(s);});
+  function render(){const like=[],no=[];box.querySelectorAll('.chip').forEach((c,i)=>{if(c.dataset.st==='1')like.push(subs[i]);if(c.dataset.st==='2')no.push(subs[i]);});
+    out.innerHTML=like.map(x=>'<p>👍 I like '+x+'.</p>').join('')+no.map(x=>"<p>👎 I don't like "+x+'.</p>').join('');}
+})();
+
+/* ---------- numbers list ---------- */
+['one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
+  .forEach((w,i)=>{const d=document.createElement('div');d.innerHTML='<b>'+(i+1)+'</b>'+w;document.getElementById('numList').appendChild(d);});
+</script>
+</body>
+</html>
