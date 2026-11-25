@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Module 3 Click Review</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;900&family=Manrope:wght@500;700;800&display=swap">
+<style>
+/* Layout: "Profiles" module styled as ID / profile cards. Each grammar rule gets a profile card with its own colour; practice blocks follow; mock test at the end */
+:root{
+  --bg:#f3f1fb; --paper:#ffffff; --ink:#191a3a; --muted:#5d5f80; --line:#d9d6ee;
+  --mag:#d61f7a; --mag-s:#fbd8ea; --vio:#6c4cf0; --vio-s:#e2dbff; --tea:#0f9b8e; --tea-s:#cdf0ec; --sun:#ffc531; --sun-s:#fff0c2;
+  --ok:#0e9f62; --ok-s:#d6f6e7; --bad:#e23b3b; --bad-s:#ffe1e1;
+  --display:"Rubik","Manrope",system-ui,sans-serif; --body:"Manrope",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;font-weight:600}
+.wrap{max-width:820px;margin:0 auto;padding-block:24px 110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+.card{background:var(--paper);border:2.5px solid var(--ink);border-radius:18px;box-shadow:0 6px 0 var(--ink)}
+
+/* hero as an ID card */
+.hero{display:grid;grid-template-columns:110px minmax(0,1fr);gap:18px;padding:20px;background:var(--ink);color:var(--paper);overflow:hidden;position:relative}
+.hero .photo{width:110px;height:130px;border:3px solid var(--paper);border-radius:12px;background:repeating-linear-gradient(135deg,var(--mag) 0 12px,#c01a6c 12px 24px);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:58px;color:var(--paper)}
+.hero .info{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero .kick{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sun)}
+.hero h1{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(30px,7vw,48px);line-height:1}
+.hero p{margin:0;color:#d8d9f2;font-weight:700;max-width:52ch}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;font-size:14px}
+.fields span{border-bottom:1.5px dashed #5b5d8a;padding-bottom:2px}
+.fields b{color:var(--sun);font-family:var(--display);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block}
+.name input{width:100%;max-width:240px;background:transparent;color:var(--paper);border:0;border-bottom:2px solid var(--sun);font:inherit;font-weight:800;padding:2px 0}
+.name input::placeholder{color:#9a9cc4}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.nav a{font-weight:800;font-size:14px;text-decoration:none;color:var(--ink);background:var(--c);border:2px solid var(--ink);border-radius:999px;padding:3px 12px}
+input:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--vio);outline-offset:2px}
+
+/* topic head */
+.topic{display:flex;align-items:center;gap:12px;scroll-margin-top:12px;margin-top:8px}
+.topic .no{flex:none;width:48px;height:48px;border-radius:14px;background:var(--c);border:2.5px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:22px}
+.topic h2{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(22px,5vw,30px);line-height:1.1}
+.topic h2 small{display:block;font-family:var(--body);font-size:14px;font-weight:700;color:var(--muted)}
+
+/* rule profile */
+details.rule{border:2.5px solid var(--ink);border-radius:18px;background:var(--paper);box-shadow:0 6px 0 var(--ink);overflow:hidden}
+details.rule summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--c);font-family:var(--display);font-weight:700;font-size:17px;border-bottom:2.5px solid var(--ink)}
+details.rule:not([open]) summary{border-bottom:0}
+details.rule summary::-webkit-details-marker{display:none}
+details.rule summary::after{content:"свернуть";margin-left:auto;font-family:var(--body);font-size:13px;font-weight:800;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:0 10px}
+details.rule:not([open]) summary::after{content:"показать правило"}
+.rbody{padding:16px;display:flex;flex-direction:column;gap:12px}
+.rows{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.rows > *{padding:7px 10px;border-bottom:1.5px solid var(--line)}
+.rows > :nth-last-child(-n+2){border-bottom:0}
+.rows .k{font-family:var(--display);font-weight:700;background:var(--c);white-space:nowrap}
+.rows .v{min-width:0}
+.rows .v i{display:block;color:var(--muted);font-weight:700}
+.ex{font-style:italic}
+.ex b{font-style:normal;background:var(--c);border-radius:4px;padding:0 3px}
+.tip{border:2px dashed var(--ink);border-radius:12px;padding:10px 12px;background:#fbfaff}
+.tip b{color:var(--mag)}
+.yesno{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yesno div{border:2px solid var(--ink);border-radius:12px;padding:10px 12px}
+.yesno .y{background:var(--ok-s)}
+.yesno .n{background:var(--bad-s)}
+.yesno h5{margin:0 0 4px;font-family:var(--display);font-size:15px}
+.ord{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:2px solid var(--ink);border-radius:12px;overflow:hidden;text-align:center;font-size:13px;font-weight:800}
+.ord span{padding:5px 2px;border-right:1.5px solid var(--ink);min-width:0;overflow-wrap:anywhere}
+.ord span:nth-child(8n){border-right:0}
+.ord .h{background:var(--c);font-family:var(--display);font-size:11px;border-bottom:1.5px solid var(--ink)}
+.ord .h small{display:block;font-family:var(--body);font-size:10px;font-weight:700}
+
+/* all: step-by-step rule */
+.steps{display:flex;flex-direction:column;gap:10px}
+.st{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;border:2px solid var(--ink);border-radius:14px;padding:12px;background:#fffdf4}
+.st > div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.sn{width:40px;height:40px;border-radius:12px;background:var(--sun);border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:20px}
+.st h5{margin:0;font-family:var(--display);font-size:17px;line-height:1.25}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two > div{border:1.5px dashed var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;background:var(--paper);min-width:0}
+.lab{font-size:14px;font-weight:800;line-height:1.35}
+.lab i{color:var(--muted)}
+.f{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.w{border:1.5px solid var(--ink);border-radius:6px;padding:0 7px;background:var(--paper);font-weight:800}
+.w.hl{background:var(--sun);border-width:2px}
+.w.hl2{background:var(--vio-s);border-width:2px}
+.note{font-size:14px;font-weight:700;color:var(--muted)}
+.note s{color:var(--bad)}
+@media (max-width:560px){.two{grid-template-columns:1fr}.st{grid-template-columns:1fr}}
+/* practice */
+.task{overflow:hidden}
+.thead{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:2.5px solid var(--ink);background:#fbfaff}
+.thead .tag{flex:none;font-family:var(--display);font-weight:900;font-size:13px;background:var(--c);border:2px solid var(--ink);border-radius:8px;padding:1px 8px}
+.thead h3{margin:0;font-family:var(--display);font-weight:700;font-size:17px;line-height:1.25;flex:1;min-width:0}
+.thead h3 small{display:block;font-family:var(--body);font-weight:700;font-size:14px;color:var(--muted)}
+.pts{flex:none;font-family:var(--display);font-weight:700;font-size:13px;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:1px 9px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbody{padding:16px;display:flex;flex-direction:column;gap:14px}
+ol.items{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+ol.items>li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px 10px;align-items:start}
+.num{width:28px;height:28px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13px;border-radius:8px;background:var(--ink);color:var(--paper)}
+.q{min-width:0;line-height:2;font-weight:700}
+.q mark{background:var(--sun-s);border-radius:4px;padding:0 3px;font-weight:800}
+.opts{grid-column:2;display:flex;flex-wrap:wrap;gap:8px}
+.opt,.tok{font:inherit;font-weight:800;font-size:16px;line-height:1.3;text-align:left;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:4px 12px;cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.opt:hover:not(:disabled),.tok:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 0 var(--ink)}
+button:disabled{cursor:default}
+.opt[aria-pressed="true"]{background:var(--vio-s);border-color:var(--vio);box-shadow:0 3px 0 var(--vio)}
+.right{background:var(--ok-s)!important;border-color:var(--ok)!important;box-shadow:0 3px 0 var(--ok)!important}
+.wrong{background:var(--bad-s)!important;border-color:var(--bad)!important;box-shadow:0 3px 0 var(--bad)!important}
+.opt.wrong{text-decoration:line-through}
+input.right,input.wrong{box-shadow:none!important}
+.inl{display:inline-flex;gap:5px;flex-wrap:wrap;vertical-align:middle;margin:2px 0}
+.inl .opt{padding:1px 9px;font-size:15px;box-shadow:0 2px 0 var(--ink)}
+.fb{grid-column:2;font-size:14px;font-weight:800;color:var(--ok)}
+.fb.no{color:var(--bad)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+input[type=text]{font:inherit;font-weight:800;font-size:16px;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:8px;padding:2px 8px;width:8.5em}
+.hint{font-size:14px;font-weight:800;color:var(--muted)}
+.ans{font-size:14px;font-weight:800;color:var(--ok)}
+.btn{font:inherit;font-family:var(--display);font-weight:700;font-size:15px;border:2px solid var(--ink);border-radius:10px;padding:7px 14px;cursor:pointer;box-shadow:0 3px 0 var(--ink);color:var(--ink);background:var(--paper);white-space:nowrap}
+.btn.main{background:var(--ink);color:var(--paper)}
+.btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn:disabled{opacity:.45}
+.brow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.res{font-weight:800}
+.bwrap{display:flex;flex-direction:column;gap:8px;min-width:0}
+.line{min-height:42px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 8px;border:2px solid var(--ink);border-radius:10px;background:var(--sun-s)}
+.line:empty::before{content:"нажимай слова по порядку…";color:var(--muted);font-weight:700;font-size:14px}
+.sent{display:flex;flex-wrap:wrap;gap:6px}
+.tok{padding:2px 9px;box-shadow:0 2px 0 var(--ink)}
+
+/* mock */
+.mock{border-color:var(--mag)}
+.mock .thead{background:var(--mag);color:var(--paper)}
+.mock .thead h3 small{color:#ffe0ef}
+.grade{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border:2.5px solid var(--ink);border-radius:16px;padding:14px;background:var(--sun-s)}
+.grade .g{width:96px;height:96px;border-radius:50%;border:5px double var(--gc);color:var(--gc);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:58px;transform:rotate(-10deg);background:var(--paper)}
+.grade .txt{flex:1;min-width:200px;display:flex;flex-direction:column;gap:4px}
+.grade .txt b{font-family:var(--display);font-size:22px}
+.weak{display:flex;flex-wrap:wrap;gap:6px}
+.weak a{font-size:14px;font-weight:800;color:var(--ink);background:var(--bad-s);border:2px solid var(--bad);border-radius:999px;padding:0 10px;text-decoration:none}
+
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:2.5px solid var(--ink);padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5}
+.bar-in{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:center}
+.meter{display:flex;flex-direction:column;gap:2px;min-width:0}
+.meter span{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meter i{display:block;height:8px;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--bg)}
+.meter i b{display:block;height:100%;width:0;background:var(--c);transition:width .3s}
+.tot{font-family:var(--display);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;bottom:calc(66px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--sun);font-family:var(--display);font-weight:700;font-size:15px;border-radius:10px;padding:7px 14px;z-index:9;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap}
+.toast.show{opacity:1}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.hero .photo{width:76px;height:76px;font-size:40px}.yesno{grid-template-columns:1fr}.ord{min-width:560px}.bar-in{grid-template-columns:repeat(2,minmax(0,1fr)) auto}.meter:nth-child(n+3){display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+:root{--sky-s:#d4ecff}
+.rubtn{font:inherit;font-family:var(--display);font-weight:700;font-size:12px;line-height:1;border:2px solid var(--ink);border-radius:6px;padding:3px 6px;background:var(--paper);color:var(--ink);cursor:pointer;vertical-align:middle;box-shadow:0 2px 0 var(--ink)}
+.rubtn[aria-expanded="true"]{background:var(--sun)}
+.rubtn.demo{cursor:default;box-shadow:none}
+.rutxt{font-size:15px;font-weight:700;color:var(--vio);background:var(--vio-s);border-radius:8px;padding:2px 10px;margin-top:4px;line-height:1.5}
+.pairwords{display:flex;flex-wrap:wrap;gap:6px}
+.pairwords span{font-size:14px;font-weight:700;border:1.5px solid var(--ink);border-radius:8px;padding:2px 8px;background:var(--paper)}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chain span:not(.ar){border:2px solid var(--ink);border-radius:10px;padding:4px 8px;background:var(--c);font-size:13px;font-weight:700;display:flex;flex-direction:column;line-height:1.3}
+.chain b{font-family:var(--display);font-size:14px}
+.chain .ar{font-weight:900;font-size:18px}
+.emo{font-size:26px;vertical-align:middle;margin-right:4px}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="card hero">
+    <div class="photo" aria-hidden="true">3</div>
+    <div class="info">
+      <span class="kick">Spotlight 7 · Module 3 · Profiles</span>
+      <h1>Grammar Review</h1>
+      <p>Вся грамматика модуля 3. Ничего печатать не нужно, только нажимать. Не знаешь слово? Нажми <span class="rubtn demo">RU</span> рядом с предложением, и появится перевод.</p>
+      <div class="nav"><a href="#t1" style="--c:var(--mag-s)">1 · who / which / whose…</a><a href="#t2" style="--c:var(--vio-s)">2 · -ing / -ed</a><a href="#t3" style="--c:var(--tea-s)">3 · Порядок прилагательных</a><a href="#t4" style="--c:var(--sun-s)">4 · all</a><a href="#mock" style="--c:#fff">★ Мини-тест</a></div>
+    </div>
+  </header>
+
+  <!-- ===== 1 ===== -->
+  <div class="topic" id="t1" style="--c:var(--mag-s)"><span class="no">1</span><h2>who, which, whose, where, when, why<small>Слова-связки «который, чей, где, когда, почему»</small></h2></div>
+  <details class="rule" open style="--c:var(--mag-s)"><summary>📋 Правило</summary><div class="rbody">
+    <p style="margin:0">Эти слова склеивают два предложения в одно. Смотри на слово <b>перед</b> пропуском:</p>
+    <div class="rows">
+      <span class="k">who</span><span class="v">человек → «который»<i class="ex">I have a friend <b>who</b> lives in Moscow. — У меня есть друг, который живёт в Москве.</i></span>
+      <span class="k">which</span><span class="v">вещь или животное → «который»<i class="ex">This is the cake <b>which</b> Mum made. — Это торт, который испекла мама.</i></span>
+      <span class="k">that</span><span class="v">можно вместо who и which<i class="ex">the cake <b>that</b> Mum made</i></span>
+      <span class="k">whose</span><span class="v">«чей», дальше сразу существительное<i class="ex">That's the boy <b>whose</b> dog is big. — Это мальчик, чья собака большая.</i></span>
+      <span class="k">where</span><span class="v">место → «где»<i class="ex">This is the park <b>where</b> I play. — Это парк, где я играю.</i></span>
+      <span class="k">when</span><span class="v">время → «когда»<i class="ex">Sunday is the day <b>when</b> I sleep a lot. — Воскресенье — день, когда я много сплю.</i></span>
+      <span class="k">why</span><span class="v">причина → «почему», после слова reason<i class="ex">the reason <b>why</b> he is sad — причина, почему он грустный</i></span>
+    </div>
+    <div class="yesno">
+      <div class="y"><h5>✓ Можно убрать who / which / that</h5>если после него стоит <b>I, you, he, we…</b><br><span class="ex">The pizza (<b>that</b>) I ate was good.</span></div>
+      <div class="n"><h5>✗ Нельзя убрать</h5>если после него <b>сразу глагол</b>:<br><span class="ex">The boy <b>who</b> sits next to me…</span><br><b>whose</b> не убираем никогда.</div>
+    </div>
+  </div></details>
+  <section class="card task" id="k-r1"></section>
+  <section class="card task" id="k-r2"></section>
+
+  <!-- ===== 2 ===== -->
+  <div class="topic" id="t2" style="--c:var(--vio-s)"><span class="no">2</span><h2>-ing или -ed?<small>boring или bored</small></h2></div>
+  <details class="rule" open style="--c:var(--vio-s)"><summary>📋 Правило</summary><div class="rbody">
+    <div class="yesno">
+      <div style="background:var(--sky-s)"><h5>📺 -ing = КАКОЙ? (вещь, событие)</h5><span class="ex">The film is <b>boring</b>.</span><br>Фильм скучный.</div>
+      <div style="background:var(--vio-s)"><h5>😴 -ed = ЧТО Я ЧУВСТВУЮ?</h5><span class="ex">I am <b>bored</b>.</span><br>Мне скучно.</div>
+    </div>
+    <div class="pairwords">
+      <span><b>boring</b> скучный · <b>bored</b> мне скучно</span>
+      <span><b>tiring</b> утомительный · <b>tired</b> я устал</span>
+      <span><b>interesting</b> интересный · <b>interested</b> мне интересно</span>
+      <span><b>exciting</b> захватывающий · <b>excited</b> я в восторге</span>
+      <span><b>amazing</b> удивительный · <b>amazed</b> я поражён</span>
+      <span><b>surprising</b> неожиданный · <b>surprised</b> я удивлён</span>
+      <span><b>scared</b> мне страшно</span>
+    </div>
+    <div class="tip">Подсказка: перед пропуском стоит <b>I am / we are / she was</b>, а речь о человеке? Скорее всего нужно <b>-ed</b>.</div>
+  </div></details>
+  <section class="card task" id="k-p1"></section>
+  <section class="card task" id="k-p2"></section>
+
+  <!-- ===== 3 ===== -->
+  <div class="topic" id="t3" style="--c:var(--tea-s)"><span class="no">3</span><h2>Порядок прилагательных<small>a nice big dog, а не a big nice dog</small></h2></div>
+  <details class="rule" open style="--c:var(--tea-s)"><summary>📋 Правило</summary><div class="rbody">
+    <p style="margin:0">Если перед словом несколько прилагательных, ставим их в таком порядке:</p>
+    <div class="chain">
+      <span style="--c:var(--mag-s)"><b>1. Мнение</b>nice, beautiful, funny</span><span class="ar">→</span>
+      <span style="--c:var(--sky-s)"><b>2. Размер</b>big, small, tall</span><span class="ar">→</span>
+      <span style="--c:var(--vio-s)"><b>3. Возраст</b>old, young, new</span><span class="ar">→</span>
+      <span style="--c:var(--sun-s)"><b>4. Цвет</b>red, black, blue</span><span class="ar">→</span>
+      <span style="--c:var(--tea-s)"><b>5. Откуда</b>Russian, Italian</span><span class="ar">→</span>
+      <span style="--c:#eee"><b>6. Из чего</b>wooden, plastic</span><span class="ar">→</span>
+      <span style="--c:#fff"><b>Предмет</b>dog, dress, box</span>
+    </div>
+    <div class="f" style="font-size:18px"><span class="w">a</span><span class="w" style="background:var(--mag-s)">nice</span><span class="w" style="background:var(--sky-s)">big</span><span class="w" style="background:var(--sun-s)">black</span><span class="w">dog</span><span class="note">— милая большая чёрная собака</span></div>
+    <div class="tip">Главное: <b>мнение всегда первое</b> (что я думаю: nice, beautiful), потом факты. Больше трёх прилагательных подряд обычно не ставят.</div>
+  </div></details>
+  <section class="card task" id="k-o1"></section>
+  <section class="card task" id="k-o2"></section>
+
+  <!-- ===== 4 ===== -->
+  <div class="topic" id="t4" style="--c:var(--sun-s)"><span class="no">4</span><h2>Местоимение all<small>все, весь, вся, всё</small></h2></div>
+  <details class="rule" open style="--c:var(--sun-s)"><summary>📋 Правило</summary><div class="rbody">
+    <p style="margin:0;font-size:19px"><b>all</b> = <b>все, весь, вся, всё</b>. Нужно запомнить 5 вещей.</p>
+    <div class="steps">
+      <div class="st"><span class="sn">1</span><div><h5>Какой глагол после all?</h5>
+        <div class="two">
+          <div><span class="lab">Много штук, можно посчитать<br><i>books, children, birds</i></span><div class="f"><span class="w">All books</span><span class="w hl">give</span><span class="w">knowledge.</span></div><span class="note">как с «они» → give, are, have</span></div>
+          <div><span class="lab">Нельзя посчитать<br><i>honey, water, music, sugar</i></span><div class="f"><span class="w">All honey</span><span class="w hl">is</span><span class="w">sweet.</span></div><span class="note">как с «оно» → is, has, gives</span></div>
+        </div></div></div>
+      <div class="st"><span class="sn">2</span><div><h5>Где стоит all в предложении с we / they / you?</h5>
+        <div class="two">
+          <div><span class="lab">Есть am / is / are / was / were<br>→ all <b>ПОСЛЕ</b> него</span><div class="f"><span class="w">We</span><span class="w hl2">were</span><span class="w hl">all</span><span class="w">relieved.</span></div><span class="note">Мы все вздохнули с облегчением.</span></div>
+          <div><span class="lab">Любой другой глагол<br>→ all <b>ПЕРЕД</b> ним</span><div class="f"><span class="w">They</span><span class="w hl">all</span><span class="w hl2">looked</span><span class="w">scared.</span></div><span class="note">Они все выглядели испуганными.</span></div>
+        </div>
+        <span class="note">Запомни: глагол <b>be</b> всегда пропускаем вперёд, а обычный глагол — нет.</span></div></div>
+      <div class="st"><span class="sn">3</span><div><h5>all + of + us / you / them</h5>
+        <div class="f"><span class="w hl">All of</span><span class="w">us</span><span class="w">were interested.</span></div>
+        <span class="note">= Все мы. Без of нельзя: <s>All us</s> · <s>All them</s></span></div></div>
+      <div class="st"><span class="sn">4</span><div><h5>all или all the?</h5>
+        <div class="two">
+          <div><span class="lab">все вообще, в мире</span><div class="f"><span class="w hl">All</span><span class="w">children go to school.</span></div></div>
+          <div><span class="lab">все те самые, конкретные</span><div class="f"><span class="w hl">All the</span><span class="w">people in the room were silent.</span></div></div>
+        </div></div></div>
+      <div class="st"><span class="sn">5</span><div><h5>«Не все» = Not all</h5>
+        <div class="f"><span class="w hl">Not all</span><span class="w">birds can sing.</span></div>
+        <span class="note">Не все птицы умеют петь. Not всегда <b>перед</b> all.</span></div></div>
+    </div>
+  </div></details>
+
+  <section class="card task" id="k-a1"></section>
+
+  <!-- ===== MOCK ===== -->
+  <div class="topic" id="mock" style="--c:var(--mag)"><span class="no" style="color:#fff">★</span><h2>Мини-тест<small>Ответы проверяются в конце, как на контрольной</small></h2></div>
+  <section class="card task mock" id="k-mock"></section>
+</div>
+
+<div class="bar"><div class="bar-in" id="barIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1100)}
+const YES=["Correct!","Молодец!","Well done!","Great!","Так держать!"];const yes=()=>{if(Math.random()<.35)toast(YES[Math.random()*YES.length|0])};
+const NO=["Почти! Попробуй ещё","Ничего, ещё раз!","Посмотри на правило выше 👆"];const no=()=>{if(Math.random()<.5)toast(NO[Math.random()*NO.length|0])};
+function shakeEl(el){el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake")}
+const score={},max={},tried={};
+const TOPIC={r:["who / which…","var(--mag)","#t1"],p:["-ing / -ed","var(--vio)","#t2"],o:["Порядок прил.","var(--tea)","#t3"],a:["all","var(--sun)","#t4"]};
+function thead(k,c,tag,t,s){return `<div class="thead"><span class="tag" style="--c:${c}">${tag}</span><h3>${t}<small>${s}</small></h3><span class="pts" id="pts-${k}"></span></div>`}
+function setPts(k){const e=document.getElementById("pts-"+k); if(e) e.textContent=`${score[k]} / ${max[k]}`; paintBar()}
+const ru=(id,txt)=>txt?`<button type="button" class="rubtn" data-ru="${id}" aria-expanded="false" title="Показать перевод">RU</button>`:"";
+const ruLine=(id,txt)=>txt?`<div class="rutxt" id="ru-${id}" hidden>${esc(txt)}</div>`:"";
+document.addEventListener("click",e=>{const b=e.target.closest("[data-ru]"); if(!b) return; const t=document.getElementById("ru-"+b.dataset.ru); t.hidden=!t.hidden; b.setAttribute("aria-expanded",String(!t.hidden));});
+
+/* ---------- generic choice (instant) ---------- */
+const CH={};
+function choice(k,c,tag,title,sub,items,inline,how){
+  CH[k]=items; max[k]=items.length; score[k]=0;
+  document.getElementById("k-"+k).innerHTML=thead(k,c,tag,title,sub)+`<div class="tbody">${how?`<p class="hint" style="margin:0">${how}</p>`:""}<ol class="items">`+
+   items.map((it,i)=>{const id=k+i;const b=shuffle(it[1].map((o,j)=>[o,j])).map(([o,j])=>`<button type="button" class="opt" data-ch="${k}" data-i="${i}" data-j="${j}">${esc(o)}</button>`).join("");
+    const q=esc(it[0]).replace(/\*(.+?)\*/g,"<mark>$1</mark>");
+    const fb=it[4]?`<div class="fb" id="fb-${k}-${i}" hidden></div>`:"";
+    return inline?`<li><span class="num">${i+1}</span><div class="q">${q.replace("___",`<span class="inl">${b}</span>`)} ${ru(id,it[3])}${ruLine(id,it[3])}</div>${fb}</li>`
+      :`<li><span class="num">${i+1}</span><div class="q">${q} ${ru(id,it[3])}${ruLine(id,it[3])}</div><div class="opts">${b}</div>${fb}</li>`;}).join("")+`</ol></div>`;
+  setPts(k);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-ch]"); if(!b||b.disabled) return;
+  const k=b.dataset.ch,i=+b.dataset.i,it=CH[k][i],key=k+i;
+  if(+b.dataset.j===it[2]){ if(!tried[key]) score[k]++; b.classList.add("right"); document.querySelectorAll(`[data-ch="${k}"][data-i="${i}"]`).forEach(x=>x.disabled=true);
+    if(it[4]){const f=document.getElementById(`fb-${k}-${i}`); f.textContent="✓ "+it[4]; f.hidden=false;} setPts(k); yes();
+  } else { tried[key]=1; b.classList.add("wrong"); b.disabled=true; no(); }
+});
+
+/* ---------- 1 ---------- */
+choice("r1","var(--mag-s)","1A","Выбери слово","who · which · whose · where · when · why",[
+ ["I have a friend ___ lives in Moscow.",["who","which","where"],0,"У меня есть друг, который живёт в Москве."],
+ ["This is the cake ___ Mum made.",["which","who","when"],0,"Это торт, который испекла мама."],
+ ["That's the girl ___ dog is very big.",["whose","who","where"],0,"Это девочка, чья собака очень большая."],
+ ["This is the park ___ I play football.",["where","which","who"],0,"Это парк, где я играю в футбол."],
+ ["Sunday is the day ___ I sleep a lot.",["when","where","who"],0,"Воскресенье — это день, когда я много сплю."],
+ ["I don't know the reason ___ he is sad.",["why","where","who"],0,"Я не знаю причину, почему он грустный."],
+ ["The cat ___ is on the sofa is my cat.",["which","who","where"],0,"Кошка, которая на диване, — моя кошка."],
+ ["My teacher is a woman ___ loves books.",["who","which","whose"],0,"Моя учительница — женщина, которая любит книги."]
+],true);
+choice("r2","var(--mag-s)","1B","Можно убрать слово?","Посмотри на выделенное слово",[
+ ["The pizza *that* I ate was very good.",["Можно убрать","Нельзя"],0,"Пицца, которую я съел, была очень вкусной.","После that стоит I."],
+ ["The boy *who* sits next to me is funny.",["Можно убрать","Нельзя"],1,"Мальчик, который сидит рядом со мной, смешной.","После who сразу глагол sits."],
+ ["This is my friend *whose* mum is a doctor.",["Можно убрать","Нельзя"],1,"Это мой друг, чья мама — врач.","whose не убираем никогда."],
+ ["The film *which* we watched was great.",["Можно убрать","Нельзя"],0,"Фильм, который мы посмотрели, был отличный.","После which стоит we."],
+ ["The dog *that* lives here is big.",["Можно убрать","Нельзя"],1,"Собака, которая живёт здесь, большая.","После that сразу глагол lives."],
+ ["The book *that* you gave me is cool.",["Можно убрать","Нельзя"],0,"Книга, которую ты мне дал, классная.","После that стоит you."]
+],false);
+
+/* ---------- 2 ---------- */
+choice("p1","var(--vio-s)","2A","-ing или -ed?","Нажми правильное слово",[
+ ["The film was ___.",["boring","bored"],0,"Фильм был скучный."],
+ ["I am ___. Let's play a game!",["bored","boring"],0,"Мне скучно. Давай поиграем!"],
+ ["I'm ___ after school.",["tired","tiring"],0,"Я устал после школы."],
+ ["The long walk was ___.",["tiring","tired"],0,"Долгая прогулка была утомительной."],
+ ["This game is ___!",["exciting","excited"],0,"Эта игра захватывающая!"],
+ ["We are ___ about the party.",["excited","exciting"],0,"Мы в восторге от вечеринки."],
+ ["I'm ___ in music.",["interested","interesting"],0,"Мне интересна музыка."],
+ ["This book is very ___.",["interesting","interested"],0,"Эта книга очень интересная."],
+ ["My little brother is ___ of the dark.",["scared","scaring"],0,"Мой младший брат боится темноты."],
+ ["Wow! Your picture is ___!",["amazing","amazed"],0,"Ух ты! Твой рисунок потрясающий!"]
+],true);
+const ED2=[["😴","The lesson was {boring|bored}. I was {bored|boring}.","Урок был скучный. Мне было скучно."],["⚽","The match was {exciting|excited}. We were {excited|exciting}!","Матч был захватывающий. Мы были в восторге!"],["🥱","The trip was {tiring|tired}. Dad was very {tired|tiring}.","Поездка была утомительной. Папа очень устал."],["🎁","The present was {surprising|surprised}. Mum was {surprised|surprising}.","Подарок был неожиданным. Мама удивилась."],["🎨","The museum was {interesting|interested}. I was {interested|interesting}.","Музей был интересный. Мне было интересно."]];
+let edN=0; max.p2=0; score.p2=0;
+document.getElementById("k-p2").innerHTML=thead("p2","var(--vio-s)","2B","Две половинки","Сначала КАКОЙ (-ing), потом ЧТО ЧУВСТВУЮТ (-ed)")+
+ `<div class="tbody"><ol class="items">${ED2.map(([em,s,r],i)=>`<li><span class="num">${i+1}</span><div class="q"><span class="emo">${em}</span>${esc(s).replace(/\{(.+?)\|(.+?)\}/g,(m,a,b)=>{const k=edN++;max.p2++;return `<span class="inl">${shuffle([[a,1],[b,0]]).map(([o,ok])=>`<button type="button" class="opt" data-e2="${k}" data-ok="${ok}">${o}</button>`).join("")}</span>`})} ${ru("e"+i,r)}${ruLine("e"+i,r)}</div></li>`).join("")}</ol></div>`;
+setPts("p2");
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-e2]"); if(!b||b.disabled) return; const k=b.dataset.e2;
+  if(b.dataset.ok==="1"){ if(!tried["e"+k]) score.p2++; b.classList.add("right"); document.querySelectorAll(`[data-e2="${k}"]`).forEach(x=>x.disabled=true); setPts("p2"); yes(); }
+  else { tried["e"+k]=1; b.classList.add("wrong"); b.disabled=true; no(); }
+});
+
+/* ---------- 3 ---------- */
+const O1=[["I have",["a","nice","big","dog"],"У меня милая большая собака."],["They live in",["a","small","old","house"],"Они живут в маленьком старом доме."],["She has",["a","beautiful","red","dress"],"У неё красивое красное платье."],["There is",["a","big","black","cat"],"Там большой чёрный кот."],["He has",["a","funny","little","brother"],"У него смешной маленький брат."],["I found",["an","old","wooden","box"],"Я нашёл старую деревянную коробку."]];
+max.o1=O1.length; score.o1=0;
+document.getElementById("k-o1").innerHTML=thead("o1","var(--tea-s)","3A","Собери фразу","Нажимай слова по порядку: мнение → размер → возраст → цвет → материал")+
+ `<div class="tbody"><p class="hint" style="margin:0">Ошибся? Нажми на слово в строке, и оно вернётся вниз.</p><ol class="items">${O1.map((it,i)=>`<li><span class="num">${i+1}</span><div class="bwrap"><div class="q" style="line-height:1.4">${esc(it[0])} … ${ru("o"+i,it[2])}${ruLine("o"+i,it[2])}</div><div class="line" id="ol-${i}"></div><div class="sent" id="ob-${i}">${shuffle(it[1]).map(w=>`<button type="button" class="tok" data-ob="${i}">${esc(w)}</button>`).join("")}</div><div class="brow"><button type="button" class="btn" data-oc="${i}">Проверить</button><span class="fb" id="of-${i}"></span></div></div></li>`).join("")}</ol></div>`;
+setPts("o1");
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-ob]"); if(t&&!t.disabled){const i=t.dataset.ob;(t.parentNode.id==="ol-"+i?document.getElementById("ob-"+i):document.getElementById("ol-"+i)).appendChild(t);return;}
+  const c=e.target.closest("[data-oc]"); if(!c) return; const i=+c.dataset.oc,line=document.getElementById("ol-"+i),f=document.getElementById("of-"+i);
+  const said=[...line.children].map(x=>x.textContent).join(" ");
+  if(said===O1[i][1].join(" ")){ if(!tried["o"+i]) score.o1++; line.classList.add("right"); f.className="fb"; f.textContent=`✓ ${O1[i][0]} ${said}.`; c.disabled=true; document.querySelectorAll(`[data-ob="${i}"]`).forEach(x=>x.disabled=true); setPts("o1"); yes(); }
+  else { tried["o"+i]=1; f.className="fb no"; f.textContent=line.children.length<O1[i][1].length?"Используй все слова, и a / an тоже!":"Почти! Сначала a / an, потом мнение, размер, возраст, цвет"; shakeEl(line); }
+});
+choice("o2","var(--tea-s)","3B","Выбери правильный порядок","Нажми правильный вариант",[
+ ["She has …",["long blond hair","blond long hair"],0,"У неё длинные светлые волосы."],
+ ["It's …",["a small wooden box","a wooden small box"],0,"Это маленькая деревянная коробка."],
+ ["My dad has …",["an old beautiful car","a beautiful old car"],1,"У моего папы красивая старая машина."],
+ ["I see …",["a black big dog","a big black dog"],1,"Я вижу большую чёрную собаку."],
+ ["Our teacher is …",["a nice young woman","a young nice woman"],0,"Наша учительница — милая молодая женщина."],
+ ["I want …",["a new red bike","a red new bike"],0,"Я хочу новый красный велосипед."]
+],false);
+
+/* ---------- 4 ---------- */
+choice("a1","var(--sun-s)","4A","all: выбери вариант","Смотри шаги 1–5 в правиле",[
+ ["All my friends ___ football.",["like","likes"],0,"Все мои друзья любят футбол."],
+ ["All milk ___ white.",["is","are"],0,"Всё молоко белое."],
+ ["We ___ happy today.",["are all","all are"],0,"Мы все сегодня счастливы."],
+ ["They ___ to school by bus.",["all go","go all"],0,"Они все ездят в школу на автобусе."],
+ ["___ are my friends.",["All of them","All them"],0,"Все они мои друзья."],
+ ["___ children in my class are nice.",["All the","The all"],0,"Все дети в моём классе милые."],
+ ["___ cats like water.",["Not all","All not"],0,"Не все кошки любят воду."],
+ ["All children ___ sweets.",["love","loves"],0,"Все дети любят сладости."]
+],true);
+
+/* ---------- mock test ---------- */
+const MOCK=[
+ ["r","This is the house ___ I live.",["where","which","who"],0],
+ ["r","I have a friend ___ mum is a teacher.",["whose","who","which"],0],
+ ["r","The boy ___ plays the guitar is my brother.",["who","which","where"],0],
+ ["p","I'm ___. Let's go to the park!",["bored","boring"],0],
+ ["p","The book was very ___.",["interesting","interested"],0],
+ ["p","We were ___ after the long walk.",["tired","tiring"],0],
+ ["o","She has ___ hair.",["long black","black long"],0],
+ ["o","I have ___ .",["a big old dog","an old big dog"],0],
+ ["o","It's ___ .",["a plastic small toy","a small plastic toy"],1],
+ ["a","We ___ friends.",["are all","all are"],0],
+ ["a","All water ___ wet.",["is","are"],0],
+ ["a","___ birds can fly.",["Not all","All not"],0]
+];
+const mockOrder=shuffle(MOCK.map((_,i)=>i)); const mockAns={}; max.mock=MOCK.length; score.mock=0; let mockDone=false;
+document.getElementById("k-mock").innerHTML=thead("mock","var(--paper)","TEST","12 вопросов","Выбери ответ в каждом вопросе, потом нажми «Проверить тест»")+
+ `<div class="tbody"><ol class="items">${mockOrder.map((mi,n)=>{const it=MOCK[mi];return `<li><span class="num">${n+1}</span><div class="q">${esc(it[1])}</div><div class="opts">${shuffle(it[2].map((o,j)=>[o,j])).map(([o,j])=>`<button type="button" class="opt" data-mk="${mi}" data-j="${j}" aria-pressed="false">${esc(o)}</button>`).join("")}</div></li>`}).join("")}</ol>
+ <div class="brow"><button type="button" class="btn main" id="mockCheck">Проверить тест</button><button type="button" class="btn" id="mockReset">Пройти заново</button><span class="res" id="mockMsg"></span></div><div id="mockRes"></div></div>`;
+setPts("mock");
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-mk]"); if(!b||mockDone) return; const mi=b.dataset.mk; mockAns[mi]=+b.dataset.j;
+  document.querySelectorAll(`[data-mk="${mi}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  document.getElementById("mockMsg").textContent=`Отвечено: ${Object.keys(mockAns).length} / ${MOCK.length}`;
+});
+document.getElementById("mockCheck").addEventListener("click",function(){
+  const left=MOCK.length-Object.keys(mockAns).length;
+  if(left&&!this.dataset.sure){ this.dataset.sure=1; document.getElementById("mockMsg").textContent=`Без ответа: ${left}. Нажми ещё раз, чтобы всё равно проверить.`; return; }
+  mockDone=true; this.disabled=true; let ok=0; const per={r:[0,0],p:[0,0],o:[0,0],a:[0,0]};
+  MOCK.forEach((it,mi)=>{ const good=mockAns[mi]===it[3]; per[it[0]][1]++; if(good){ok++;per[it[0]][0]++;}
+    document.querySelectorAll(`[data-mk="${mi}"]`).forEach(x=>{x.disabled=true; const j=+x.dataset.j; if(j===it[3]) x.classList.add("right"); else if(j===mockAns[mi]) x.classList.add("wrong");});
+  });
+  score.mock=ok; setPts("mock");
+  const pct=Math.round(ok/MOCK.length*100), g=pct>=90?5:pct>=70?4:pct>=50?3:2, gc={5:"var(--ok)",4:"var(--vio)",3:"#d98a00",2:"var(--bad)"}[g];
+  const weak=Object.entries(per).filter(([k,v])=>v[0]<v[1]);
+  const msg={5:"Отлично! Ты готов к контрольной 🎉",4:"Хорошо! Чуть-чуть повторить, и будет отлично.",3:"Неплохо! Повтори темы ниже и попробуй ещё раз.",2:"Ничего страшного! Повтори правила и пройди тест заново."}[g];
+  document.getElementById("mockRes").innerHTML=`<div class="grade" style="--gc:${gc}"><span class="g">${g}</span><div class="txt"><b>${ok} / ${MOCK.length} · ${pct}%</b><span>${msg}</span>
+    <span>${Object.entries(per).map(([k,v])=>`${TOPIC[k][0]}: ${v[0]}/${v[1]}`).join(" · ")}</span>
+    ${weak.length?`<span>Повторить:</span><div class="weak">${weak.map(([k])=>`<a href="${TOPIC[k][2]}">${TOPIC[k][0]}</a>`).join("")}</div>`:""}</div></div>`;
+  document.getElementById("mockMsg").textContent="";
+});
+document.getElementById("mockReset").addEventListener("click",()=>{ for(const k in mockAns) delete mockAns[k]; mockDone=false; score.mock=0;
+  const c=document.getElementById("mockCheck"); c.disabled=false; delete c.dataset.sure; document.getElementById("mockRes").innerHTML=""; document.getElementById("mockMsg").textContent="";
+  document.querySelectorAll("[data-mk]").forEach(x=>{x.disabled=false;x.classList.remove("right","wrong");x.setAttribute("aria-pressed","false")}); setPts("mock"); });
+
+/* ---------- bar ---------- */
+const GROUPS={r:["r1","r2"],p:["p1","p2"],o:["o1","o2"],a:["a1"]};
+document.getElementById("barIn").innerHTML=Object.entries(TOPIC).map(([k,[n,c]])=>`<div class="meter" style="--c:${c}"><span id="ml-${k}">${n}</span><i><b id="mb-${k}"></b></i></div>`).join("")+`<span class="tot" id="tot"></span>`;
+function paintBar(){
+  if(!document.getElementById("tot")) return;
+  Object.entries(GROUPS).forEach(([k,ks])=>{const s=ks.reduce((a,x)=>a+(score[x]||0),0),m=ks.reduce((a,x)=>a+(max[x]||0),0);
+    document.getElementById("ml-"+k).textContent=`${TOPIC[k][0]} ${s}/${m}`; document.getElementById("mb-"+k).style.width=(m?s/m*100:0)+"%";});
+  const all=Object.values(GROUPS).flat(), s=all.reduce((a,x)=>a+(score[x]||0),0), m=all.reduce((a,x)=>a+(max[x]||0),0);
+  document.getElementById("tot").textContent=`${s}/${m}${score.mock?` · тест ${score.mock}/${max.mock}`:""}`;
+}
+paintBar();
+</script>
+
+</body>
+</html>
