@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Урок 4 · Интернет и ИИ</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d1d1f; --muted:#6b6b70; --line:#dcd8cf;
+  --accent:#2f5d8a; --accent-ink:#ffffff; --ok:#1f7a45; --ok-bg:#e3f3e8; --bad:#b3261e; --bad-bg:#fbe6e4;
+  --gap-bg:#fbfaf6; --rule:#eef3f8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --card:#202226; --ink:#ececee; --muted:#9a9aa2; --line:#363840;
+    --accent:#7fb0e0; --accent-ink:#0e1620; --ok:#6fd39a; --ok-bg:#183326; --bad:#ff8a80; --bad-bg:#3a1d1b;
+    --gap-bg:#191a1d; --rule:#1d2733;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a; --card:#202226; --ink:#ececee; --muted:#9a9aa2; --line:#363840;
+  --accent:#7fb0e0; --accent-ink:#0e1620; --ok:#6fd39a; --ok-bg:#183326; --bad:#ff8a80; --bad-bg:#3a1d1b;
+  --gap-bg:#191a1d; --rule:#1d2733;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px 80px}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
+header.top .t{font-weight:700;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);white-space:nowrap}
+.score b{color:var(--ink)}
+nav.jump{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;max-width:820px;margin:0 auto;scrollbar-width:none}
+nav.jump::-webkit-scrollbar{display:none}
+nav.jump a{flex:none;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;background:var(--card)}
+nav.jump a.done{border-color:var(--ok);color:var(--ok)}
+h1{font-size:24px;line-height:1.25;margin:28px 0 6px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:15px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;margin:18px 0;scroll-margin-top:110px}
+.card h2{font-size:18px;margin:0 0 6px}
+.instr{margin:0 0 14px;color:var(--muted);font-size:15px}
+.memo{background:var(--rule);border-color:transparent}
+.memo ol{margin:6px 0 0;padding-left:20px}
+.rule{background:var(--rule);border-radius:10px;padding:12px 14px;margin:0 0 14px;font-size:15px}
+.rule table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+.rule th,.rule td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.rule th{font-weight:600}
+.rule ul{margin:6px 0 0;padding-left:20px}
+.rule li{margin:3px 0}
+.rule p{margin:6px 0}
+.rule .ex{color:var(--muted)}
+.rule td:first-child{white-space:nowrap}
+.rule table.stack td:first-child{white-space:normal}
+@media (max-width:600px){
+  .rule table.stack tr:first-child{display:none}
+  .rule table.stack tr{display:block;padding:8px 0;border-bottom:1px solid var(--line)}
+  .rule table.stack td{display:block;border:none;padding:1px 0}
+  .rule table.stack td:first-child{font-weight:700}
+  .rule table.stack td:nth-child(3)::before{content:"Подсказки: ";color:var(--muted)}
+  .rule table.stack td:nth-child(4)::before{content:"Пример: ";color:var(--muted)}
+}
+.mcopts{margin:6px 0 0;font-size:15px;line-height:1.6}
+.info p{margin:6px 0}
+.texttitle{font-style:italic;font-weight:600;margin:4px 0 8px}
+.text p{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.85}
+.num{font-weight:700;color:var(--muted);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.base{font-size:13px;color:var(--muted);letter-spacing:.02em}
+input.gap{font:inherit;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;
+  border:none;border-bottom:2px solid var(--line);background:var(--gap-bg);color:var(--ink);
+  padding:2px 6px;border-radius:6px 6px 0 0;min-width:6ch;max-width:100%;outline:none;transition:border-color .15s,background .15s}
+input.gap:focus{border-bottom-color:var(--accent)}
+input.gap.ok{border-bottom-color:var(--ok);background:var(--ok-bg)}
+input.gap.bad{border-bottom-color:var(--bad);background:var(--bad-bg)}
+.fix{display:inline-block;font-size:14px;color:var(--ok);font-weight:600;margin-left:4px}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 22px;margin:0;padding:0;list-style:none}
+.list li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.list .w{min-width:7.5em}
+.sents{margin:0;padding-left:22px}
+.sents li{margin:0 0 12px;line-height:1.9}
+.tf li{margin:0 0 14px}
+.headings{margin:0 0 14px;padding-left:22px}
+.headings li{margin:2px 0}
+.tf .opts.nums button{min-width:44px}
+.tf .lbl{font-weight:700}
+.tf .opts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.tf button{font:inherit;font-size:14px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--gap-bg);color:var(--ink);cursor:pointer}
+.tf button.sel{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.tf button.sel.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.tf button.sel.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.tf button.right{outline:2px solid var(--ok);outline-offset:1px}
+table.vocab{width:100%;border-collapse:collapse;font-size:15px;margin:0 0 16px}
+table.vocab td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.vocab td:first-child{font-weight:600;width:42%}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.actions button{font:inherit;font-size:14px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.actions button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.actions .res{margin-left:auto;font-size:14px;font-weight:600}
+.res.good{color:var(--ok)} .res.mid{color:var(--ink)}
+.expl{display:none;margin-top:12px;font-size:14px;background:var(--gap-bg);border-radius:10px;padding:10px 14px}
+.expl.show{display:block}
+.expl ul{margin:0;padding-left:18px}
+.expl li{margin:3px 0}
+details.nojs{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:14px}
+details.nojs summary{cursor:pointer;font-weight:600;color:var(--accent)}
+details.nojs ul{margin:8px 0 0;padding-left:18px}
+.hint{background:var(--rule);border-color:transparent;font-size:15px}
+.reset-all{display:block;margin:30px auto 0;font:inherit;font-size:14px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 14px;cursor:pointer}
+@media (max-width:480px){
+  .card{padding:16px 14px 14px;border-radius:12px}
+  .text p{font-size:16px}
+  h1{font-size:21px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="t">Урок 4 · Интернет и ИИ</div>
+    <div class="score">Баллы: <b id="total">0</b> / <span id="max">70</span></div>
+  </div>
+  <nav class="jump" id="jump"><a href="#t41" id="nav_t41">4.1</a><a href="#t42" id="nav_t42">4.2</a><a href="#t43" id="nav_t43">4.3</a><a href="#t45" id="nav_t45">4.4</a><a href="#t46" id="nav_t46">4.5</a><a href="#t47" id="nav_t47">4.6</a><a href="#t48" id="nav_t48">Д/З</a></nav>
+</header>
+
+<main class="wrap">
+  <h1>Урок 4</h1>
+  <p class="sub">Словообразование: приставки и цепочки · Грамматика: условные предложения и I wish · Тема: интернет и искусственный интеллект</p>
+
+  <section class="card memo">
+    <h2>Памятка: как заполнять пропуск в словообразовании</h2>
+    <ol>
+      <li>Какая часть речи нужна? После артикля или прилагательного — существительное; перед существительным или после be — прилагательное; при глаголе — наречие.</li>
+      <li>Нужно ли отрицание (un-, in-, im-, dis-)?</li>
+      <li>Нужно ли множественное число или -s / -ed у глагола?</li>
+      <li>Проверь написание по буквам: ошибка в одной букве = 0 баллов.</li>
+    </ol>
+  </section>
+
+  <div class="card hint" id="nojsHint"><b>Если кнопки «Проверить» не появились</b>, значит файл открыт во встроенном просмотре (Telegram, почта, «Файлы» и т. п.). Задания всё равно можно читать, а ответы — открыть под каждым заданием. Чтобы всё работало, откройте файл в браузере: Chrome, Safari, Яндекс Браузер.</div>
+<div id="tasks"><section class="card" id="t41"><h2>Задание 4.1</h2><p class="instr">Образуйте антонимы с помощью приставки.</p><div class="rule"><b>Правило: приставки со значением «не»</b>
+<table><tbody><tr><th>Приставка</th><th>Когда</th><th>Примеры</th></tr>
+<tr><td>un-</td><td>самая частая, с прилагательными и наречиями</td><td>kind → unkind, known → unknown, able → unable</td></tr>
+<tr><td>in-</td><td>с некоторыми прилагательными</td><td>complete → incomplete, visible → invisible</td></tr>
+<tr><td>im-</td><td>перед p, m, b</td><td>polite → impolite, mature → immature</td></tr>
+<tr><td>il-</td><td>перед l</td><td>legal → illegal</td></tr>
+<tr><td>ir-</td><td>перед r</td><td>regular → irregular</td></tr>
+<tr><td>dis-</td><td>с глаголами и некоторыми существительными</td><td>obey → disobey, honest → dishonest</td></tr></tbody></table>
+<p><b>Ловушка:</b> существительное comfort → <b>dis</b>comfort, но прилагательное comfortable → <b>un</b>comfortable. Приставка зависит от того, к какому слову её присоединяют.</p>
+<p>На стыке буквы не теряются: un + natural = u<b>nn</b>atural, dis + appear = disappear (одна s).</p></div><ul class="list"><li><span class="w">1. attractive →</span><input class="gap" data-key="t41_0" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">2. comfortable →</span><input class="gap" data-key="t41_1" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">3. expected →</span><input class="gap" data-key="t41_2" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">4. fair →</span><input class="gap" data-key="t41_3" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">5. forgettable →</span><input class="gap" data-key="t41_4" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">6. friendly →</span><input class="gap" data-key="t41_5" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">7. healthy →</span><input class="gap" data-key="t41_6" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">8. lucky →</span><input class="gap" data-key="t41_7" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">9. natural →</span><input class="gap" data-key="t41_8" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">10. pleasant →</span><input class="gap" data-key="t41_9" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">11. successful →</span><input class="gap" data-key="t41_10" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">12. usual →</span><input class="gap" data-key="t41_11" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">13. expensive →</span><input class="gap" data-key="t41_12" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">14. effective →</span><input class="gap" data-key="t41_13" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">15. possible →</span><input class="gap" data-key="t41_14" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">16. agree →</span><input class="gap" data-key="t41_15" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">17. appear →</span><input class="gap" data-key="t41_16" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li><li><span class="w">18. like →</span><input class="gap" data-key="t41_17" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"></li></ul><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. attractive → unattractive</b> — un-</li><li><b>2. comfortable → uncomfortable</b> — un-, не discomfortable</li><li><b>3. expected → unexpected</b> — un-</li><li><b>4. fair → unfair</b> — un-</li><li><b>5. forgettable → unforgettable</b> — un-; двойная t</li><li><b>6. friendly → unfriendly</b> — un-</li><li><b>7. healthy → unhealthy</b> — un-</li><li><b>8. lucky → unlucky</b> — un-</li><li><b>9. natural → unnatural</b> — un-; две n на стыке</li><li><b>10. pleasant → unpleasant</b> — un-</li><li><b>11. successful → unsuccessful</b> — un-</li><li><b>12. usual → unusual</b> — un-</li><li><b>13. expensive → inexpensive</b> — in-</li><li><b>14. effective → ineffective</b> — in-</li><li><b>15. possible → impossible</b> — im- перед p</li><li><b>16. agree → disagree</b> — dis- с глаголом</li><li><b>17. appear → disappear</b> — dis-; одна s, две p</li><li><b>18. like → dislike</b> — dis- с глаголом</li></ul></details></section><section class="card" id="t42"><h2>Задание 4.2 · Цепочки</h2><p class="instr">Образуйте слова по цепочке, пока не получится слово с указанным значением.</p><div class="rule"><b>Как строить цепочку</b>
+<p>Иногда к слову нужно добавить два аффикса: суффикс и приставку или два суффикса. Делай по шагам.</p>
+<p>Пример: CARE → care<b>less</b> (прилагательное «небрежный») → careless<b>ly</b> (наречие «небрежно»).</p>
+<p>Пример: KIND → kind<b>ness</b> («доброта»); KIND → <b>un</b>kind («недобрый»).</p>
+<ul><li>Сначала реши, какая часть речи нужна в конце.</li>
+<li>Потом — нужно ли отрицание.</li>
+<li>Приставка обычно добавляется к прилагательному, а -ly — в самом конце.</li></ul></div><ol class="sents"><li>LUCK → <input class="gap" data-key="t42_0_0" style="width:8ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_0_1" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («невезучий»)</li><li>FORTUNE → <input class="gap" data-key="t42_1_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_1_1" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_1_2" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («к сожалению»)</li><li>NATION → <input class="gap" data-key="t42_2_0" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_2_1" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («международный»)</li><li>AGREE → <input class="gap" data-key="t42_3_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_3_1" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («разногласие»)</li><li>EXPENSE → <input class="gap" data-key="t42_4_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_4_1" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («недорогой»)</li><li>SUCCESS → <input class="gap" data-key="t42_5_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_5_1" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («неудачный»)</li><li>DANGER → <input class="gap" data-key="t42_6_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_6_1" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («опасно», наречие)</li><li>TRADITION → <input class="gap" data-key="t42_7_0" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_7_1" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («традиционно»)</li><li>HEALTH → <input class="gap" data-key="t42_8_0" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_8_1" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («нездоровый»)</li><li>COMFORT → <input class="gap" data-key="t42_9_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («неудобство»); COMFORT → <input class="gap" data-key="t42_9_1" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> → <input class="gap" data-key="t42_9_2" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> («неудобный»)</li></ol><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. lucky … unlucky</b> — luck → lucky → unlucky</li><li><b>2. fortunate … unfortunate … unfortunately</b> — fortune → fortunate → unfortunate → unfortunately</li><li><b>3. national … international</b> — inter- = «между»</li><li><b>4. agreement … disagreement</b> — agree → agreement → disagreement</li><li><b>5. expensive … inexpensive</b> — приставка in-</li><li><b>6. successful … unsuccessful</b> — две c, две s, одна l</li><li><b>7. dangerous … dangerously</b> — danger → dangerous → dangerously</li><li><b>8. traditional … traditionally</b> — -al + -ly = -ally</li><li><b>9. healthy … unhealthy</b> — health → healthy → unhealthy</li><li><b>10. discomfort … comfortable … uncomfortable</b> — существительное → dis-, прилагательное → un-</li></ul></details></section><section class="card" id="t43"><h2>Задание 4.3 · формат ОГЭ (29–34)</h2><p class="instr">Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту.</p><div class="rule"><b>Как понять, что нужно отрицание</b>
+<p>В ОГЭ приставку надо «увидеть» по смыслу. Подсказки в тексте:</p>
+<ul><li><b>but, however, although</b> — противопоставление: если в одной части хорошо, в другой часто «не».</li>
+<li><b>at first … but now</b> — сначала было одно, потом другое.</li>
+<li>Слова с отрицательным смыслом рядом: problem, harmful, worried, bad.</li></ul>
+<p>Прочитай предложение целиком и спроси себя: «здесь хорошо или плохо?»</p></div><div class="texttitle">Phones at school</div><div class="text"><p>Some teenagers think that a day without a phone is <span class="num">(29)</span> <input class="gap" data-key="t43_0" style="width:13ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(POSSIBLE)</span>. However, many teachers <span class="num">(30)</span> <input class="gap" data-key="t43_1" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(AGREE)</span> with them. They say that using phones in class is <span class="num">(31)</span> <input class="gap" data-key="t43_2" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(EFFECTIVE)</span> for learning and can be <span class="num">(32)</span> <input class="gap" data-key="t43_3" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(HEALTH)</span> for children's eyes. At our school, phones were banned last year. At first the pupils were very <span class="num">(33)</span> <input class="gap" data-key="t43_4" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(HAPPY)</span> about the new rule, but now many of them find it <span class="num">(34)</span> <input class="gap" data-key="t43_5" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(SURPRISE)</span> useful.</p></div><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>(29) impossible</b> — «день без телефона невозможен»; im- перед p</li><li><b>(30) disagree</b> — However — учителя не согласны; глагол → dis-</li><li><b>(31) ineffective</b> — учителя против телефонов → «неэффективно»; in-</li><li><b>(32) unhealthy</b> — вред для глаз → «вредно для здоровья»; un-</li><li><b>(33) unhappy</b> — At first … but now — сначала были недовольны; un-</li><li><b>(34) surprisingly</b> — наречие перед прилагательным useful: surprising → surprisingly</li></ul></details></section><section class="card" id="t45"><h2>Задание 4.4 · формат ОГЭ (20–28)</h2><p class="instr">Преобразуйте слова в скобках так, чтобы они грамматически соответствовали тексту.</p><div class="rule"><b>Правило: условные предложения</b>
+<table class="stack"><tbody><tr><th>Тип</th><th>If-часть</th><th>Главная часть</th><th>Пример</th></tr>
+<tr><td>0 — всегда так</td><td>Present Simple</td><td>Present Simple</td><td>If you heat ice, it melts.</td></tr>
+<tr><td>1 — реально в будущем</td><td>Present Simple</td><td>will + V</td><td>If it snows, we will go skiing.</td></tr>
+<tr><td>2 — нереально сейчас</td><td>Past Simple (were)</td><td>would + V</td><td>If I knew his number, I would call him.</td></tr></tbody></table>
+<p><b>Главное правило:</b> после <b>if, when, unless</b> в значении будущего <b>will не ставится</b>: If it <b>rains</b> tomorrow (не will rain).</p>
+<p><b>I wish + Past Simple</b> — сожаление о настоящем: I wish I <b>lived</b> by the sea (жаль, что не живу). С be — <b>were</b>: I wish I <b>were</b> taller (was тоже допустимо).</p>
+<p>Ещё в тексте: местоимения после предлога (with <b>him</b>), пассив (was + V3), сравнительная степень (-er) и порядковые числительные (third).</p></div><div class="texttitle">If I had a robot</div><div class="text"><p>If I <span class="num">(20)</span> <input class="gap" data-key="t45_0" style="width:6ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(HAVE)</span> a robot, it would do all my homework. My little brother <span class="num">(21)</span> <input class="gap" data-key="t45_1" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(THINK)</span> that robots are dangerous. He says that if robots <span class="num">(22)</span> <input class="gap" data-key="t45_2" style="width:9ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(BECOME)</span> too clever, they will rule the world. I don't agree with <span class="num">(23)</span> <input class="gap" data-key="t45_3" style="width:6ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(HE)</span>. Last week we <span class="num">(24)</span> <input class="gap" data-key="t45_4" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(WATCH)</span> a film about robots. The film <span class="num">(25)</span> <input class="gap" data-key="t45_5" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(MAKE)</span> in Hollywood ten years ago, but it still looks modern. I wish my brother <span class="num">(26)</span> <input class="gap" data-key="t45_6" style="width:7ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(BE)</span> more open-minded! Anyway, robots are becoming <span class="num">(27)</span> <input class="gap" data-key="t45_7" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(CHEAP)</span> every year, and the <span class="num">(28)</span> <input class="gap" data-key="t45_8" style="width:8ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> <span class="base">(THREE)</span> generation of home robots is already on sale.</p></div><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>(20) had</b> — 2-й тип: if + Past Simple, would в главной части</li><li><b>(21) thinks</b> — факт в настоящем, he → -s</li><li><b>(22) become</b> — 1-й тип: после if нет will, Present Simple</li><li><b>(23) him</b> — после предлога with — объектное местоимение</li><li><b>(24) watched</b> — last week → Past Simple</li><li><b>(25) was made</b> — фильм сняли (пассив), ten years ago → was + V3; make — made</li><li><b>(26) were / was</b> — I wish + Past Simple; с be — were (was тоже засчитывается)</li><li><b>(27) cheaper</b> — сравнительная степень: cheap → cheaper</li><li><b>(28) third</b> — порядковое числительное: three → third</li></ul></details></section><section class="card" id="t46"><h2>Задание 4.5 · Лексика «Интернет и искусственный интеллект»</h2><p class="instr">Выучите слова, затем вставьте подходящие слова из таблицы в правильной форме.</p><table class="vocab"><tbody><tr><td>artificial intelligence (AI)</td><td>искусственный интеллект (ИИ)</td></tr><tr><td>chatbot</td><td>чат-бот</td></tr><tr><td>neural network</td><td>нейросеть</td></tr><tr><td>device</td><td>устройство</td></tr><tr><td>data</td><td>данные</td></tr><tr><td>to search for</td><td>искать</td></tr><tr><td>reliable</td><td>надёжный, достоверный</td></tr><tr><td>to check the facts</td><td>проверять факты</td></tr><tr><td>fake news</td><td>фейковые новости</td></tr><tr><td>screen time</td><td>время перед экраном</td></tr><tr><td>social media</td><td>соцсети</td></tr><tr><td>online safety</td><td>безопасность в интернете</td></tr><tr><td>to download</td><td>скачивать</td></tr><tr><td>to think critically</td><td>мыслить критически</td></tr><tr><td>to invent</td><td>придумывать, изобретать</td></tr><tr><td>in everyday life</td><td>в повседневной жизни</td></tr></tbody></table><ol class="sents"><li>A <input class="gap" data-key="t46_0_0" style="width:10ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> can answer your questions in a few seconds.</li><li>Not every website is <input class="gap" data-key="t46_1_0" style="width:11ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">, so you should always <input class="gap" data-key="t46_1_1" style="width:18ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">.</li><li>Never share your password with strangers: remember about <input class="gap" data-key="t46_2_0" style="width:16ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">.</li><li>I spend too much <input class="gap" data-key="t46_3_0" style="width:14ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> on my phone, especially on <input class="gap" data-key="t46_3_1" style="width:15ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">.</li><li>A <input class="gap" data-key="t46_4_0" style="width:17ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> can create pictures from a short text description.</li><li>Some people believe <input class="gap" data-key="t46_5_0" style="width:12ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ"> and share it with their friends.</li></ol><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. chatbot</b> — «чат-бот»</li><li><b>2. reliable … check the facts</b> — reliable — надёжный; to check the facts — проверять факты</li><li><b>3. online safety</b> — «безопасность в интернете»</li><li><b>4. screen time … social media</b> — screen time — время перед экраном; social media — соцсети</li><li><b>5. neural network</b> — «нейросеть»</li><li><b>6. fake news</b> — «фейковые новости»</li></ul></details></section><section class="card" id="t47"><h2>Задание 4.6 · Чтение (формат ОГЭ)</h2><p class="instr">Прочитайте текст. Определите, какие утверждения соответствуют содержанию текста (True), какие не соответствуют (False) и о чём в тексте не сказано (Not stated).</p><div class="rule"><b>Как отличить False от Not stated</b>
+<ul><li><b>True</b> — в тексте сказано то же самое, часто другими словами.</li>
+<li><b>False</b> — в тексте сказано <b>противоположное</b>. Можно найти фразу, которая опровергает утверждение.</li>
+<li><b>Not stated</b> — в тексте <b>нет информации</b> об этом: ни «да», ни «нет».</li>
+<li>Осторожно со словами all, every, never, only: «в некоторых школах» ≠ «во всех школах» — это False.</li></ul></div><div class="texttitle">Artificial intelligence in our lives</div><div class="text">
+<p>Ten years ago, artificial intelligence seemed like something from a science fiction film. Now it has become part of our everyday life. Millions of people use AI assistants to translate texts, plan their holidays and even write poems.</p>
+<p>Many students use chatbots to help them with their homework. A chatbot can explain a difficult topic in simple words. However, teachers warn that copying answers from a chatbot does not help you learn anything. In some schools, pupils have to tell the teacher if they used AI.</p>
+<p>AI is also changing the world of work. Some jobs, such as translators or call-centre operators, may disappear. At the same time, new professions are appearing: companies already need specialists who can train and test AI systems.</p>
+<p>Experts say that the most important thing is to think critically. AI tools sometimes make mistakes and even invent facts. That is why you should always check important information in reliable sources.</p></div><ol class="sents tf" style="list-style:none;padding-left:0"><li><span class="lbl">1. People started using AI in everyday life many decades ago.</span><div class="opts " data-key="t47_0"><button type="button" data-v="T">True</button><button type="button" data-v="F" class="">False</button><button type="button" data-v="NS">Not stated</button></div></li><li><span class="lbl">2. People use AI assistants to plan their holidays.</span><div class="opts " data-key="t47_1"><button type="button" data-v="T" class="">True</button><button type="button" data-v="F">False</button><button type="button" data-v="NS">Not stated</button></div></li><li><span class="lbl">3. Teachers think that copying answers from a chatbot is a good way to learn.</span><div class="opts " data-key="t47_2"><button type="button" data-v="T">True</button><button type="button" data-v="F" class="">False</button><button type="button" data-v="NS">Not stated</button></div></li><li><span class="lbl">4. In all schools, pupils must tell the teacher if they used AI.</span><div class="opts " data-key="t47_3"><button type="button" data-v="T">True</button><button type="button" data-v="F" class="">False</button><button type="button" data-v="NS">Not stated</button></div></li><li><span class="lbl">5. Translators earn less money because of AI.</span><div class="opts " data-key="t47_4"><button type="button" data-v="T">True</button><button type="button" data-v="F">False</button><button type="button" data-v="NS" class="">Not stated</button></div></li><li><span class="lbl">6. Companies need specialists who can test AI systems.</span><div class="opts " data-key="t47_5"><button type="button" data-v="T" class="">True</button><button type="button" data-v="F">False</button><button type="button" data-v="NS">Not stated</button></div></li><li><span class="lbl">7. Most chatbots are free.</span><div class="opts " data-key="t47_6"><button type="button" data-v="T">True</button><button type="button" data-v="F">False</button><button type="button" data-v="NS" class="">Not stated</button></div></li></ol><details class="nojs"><summary>Ответы и объяснения</summary><ul><li><b>1. People started using AI in everyday life many decades ago. — F</b>: «Ten years ago, artificial intelligence seemed like something from a science fiction film»</li><li><b>2. People use AI assistants to plan their holidays. — T</b>: «use AI assistants to … plan their holidays»</li><li><b>3. Teachers think that copying answers from a chatbot is a good way to learn. — F</b>: «copying answers … does not help you learn anything»</li><li><b>4. In all schools, pupils must tell the teacher if they used AI. — F</b>: «In some schools» — не во всех</li><li><b>5. Translators earn less money because of AI. — NS</b>: сказано, что профессия может исчезнуть, о зарплате ничего</li><li><b>6. Companies need specialists who can test AI systems. — T</b>: «companies already need specialists who can train and test AI systems»</li><li><b>7. Most chatbots are free. — NS</b>: о цене чат-ботов в тексте ничего нет</li></ul></details></section><section class="card" id="t48"><h2>Домашнее задание</h2><div class="info"><p>1) Выписать из таблицы словообразования все слова с приставками (un-, in-, im-, dis-, inter-) и выучить их.</p>
+<p>2) Дописать предложения:<br>If I didn't have a phone, … · If it rains tomorrow, … · If I were a teacher, … · I wish … · If I could live in any country, … · Unless I do my homework, …</p></div></section></div>
+  <button class="reset-all" id="resetAll">Стереть все ответы и начать заново</button>
+</main>
+
+<script>
+const TASKS = [
+{
+  id:"t41", nav:"4.1", title:"Задание 4.1", type:"list",
+  instr:"Образуйте антонимы с помощью приставки.",
+  rule:`<b>Правило: приставки со значением «не»</b>
+<table><tr><th>Приставка</th><th>Когда</th><th>Примеры</th></tr>
+<tr><td>un-</td><td>самая частая, с прилагательными и наречиями</td><td>kind → unkind, known → unknown, able → unable</td></tr>
+<tr><td>in-</td><td>с некоторыми прилагательными</td><td>complete → incomplete, visible → invisible</td></tr>
+<tr><td>im-</td><td>перед p, m, b</td><td>polite → impolite, mature → immature</td></tr>
+<tr><td>il-</td><td>перед l</td><td>legal → illegal</td></tr>
+<tr><td>ir-</td><td>перед r</td><td>regular → irregular</td></tr>
+<tr><td>dis-</td><td>с глаголами и некоторыми существительными</td><td>obey → disobey, honest → dishonest</td></tr></table>
+<p><b>Ловушка:</b> существительное comfort → <b>dis</b>comfort, но прилагательное comfortable → <b>un</b>comfortable. Приставка зависит от того, к какому слову её присоединяют.</p>
+<p>На стыке буквы не теряются: un + natural = u<b>nn</b>atural, dis + appear = disappear (одна s).</p>`,
+  items:[
+    ["attractive",["unattractive"],"un-"],["comfortable",["uncomfortable"],"un-, не discomfortable"],["expected",["unexpected"],"un-"],
+    ["fair",["unfair"],"un-"],["forgettable",["unforgettable"],"un-; двойная t"],["friendly",["unfriendly"],"un-"],
+    ["healthy",["unhealthy"],"un-"],["lucky",["unlucky"],"un-"],["natural",["unnatural"],"un-; две n на стыке"],
+    ["pleasant",["unpleasant"],"un-"],["successful",["unsuccessful"],"un-"],["usual",["unusual"],"un-"],
+    ["expensive",["inexpensive"],"in-"],["effective",["ineffective"],"in-"],["possible",["impossible"],"im- перед p"],
+    ["agree",["disagree"],"dis- с глаголом"],["appear",["disappear"],"dis-; одна s, две p"],["like",["dislike"],"dis- с глаголом"]
+  ]
+},
+{
+  id:"t42", nav:"4.2", title:"Задание 4.2 · Цепочки", type:"sents",
+  instr:"Образуйте слова по цепочке, пока не получится слово с указанным значением.",
+  rule:`<b>Как строить цепочку</b>
+<p>Иногда к слову нужно добавить два аффикса: суффикс и приставку или два суффикса. Делай по шагам.</p>
+<p>Пример: CARE → care<b>less</b> (прилагательное «небрежный») → careless<b>ly</b> (наречие «небрежно»).</p>
+<p>Пример: KIND → kind<b>ness</b> («доброта»); KIND → <b>un</b>kind («недобрый»).</p>
+<ul><li>Сначала реши, какая часть речи нужна в конце.</li>
+<li>Потом — нужно ли отрицание.</li>
+<li>Приставка обычно добавляется к прилагательному, а -ly — в самом конце.</li></ul>`,
+  items:[
+    ["LUCK → [[]] → [[]] («невезучий»)",[["lucky"],["unlucky"]],"luck → lucky → unlucky"],
+    ["FORTUNE → [[]] → [[]] → [[]] («к сожалению»)",[["fortunate"],["unfortunate"],["unfortunately"]],"fortune → fortunate → unfortunate → unfortunately"],
+    ["NATION → [[]] → [[]] («международный»)",[["national"],["international"]],"inter- = «между»"],
+    ["AGREE → [[]] → [[]] («разногласие»)",[["agreement"],["disagreement"]],"agree → agreement → disagreement"],
+    ["EXPENSE → [[]] → [[]] («недорогой»)",[["expensive"],["inexpensive"]],"приставка in-"],
+    ["SUCCESS → [[]] → [[]] («неудачный»)",[["successful"],["unsuccessful"]],"две c, две s, одна l"],
+    ["DANGER → [[]] → [[]] («опасно», наречие)",[["dangerous"],["dangerously"]],"danger → dangerous → dangerously"],
+    ["TRADITION → [[]] → [[]] («традиционно»)",[["traditional"],["traditionally"]],"-al + -ly = -ally"],
+    ["HEALTH → [[]] → [[]] («нездоровый»)",[["healthy"],["unhealthy"]],"health → healthy → unhealthy"],
+    ["COMFORT → [[]] («неудобство»); COMFORT → [[]] → [[]] («неудобный»)",[["discomfort"],["comfortable"],["uncomfortable"]],"существительное → dis-, прилагательное → un-"]
+  ]
+},
+{
+  id:"t43", nav:"4.3", title:"Задание 4.3 · формат ОГЭ (29–34)", type:"text",
+  instr:"Образуйте от слов в скобках однокоренные слова так, чтобы они грамматически и лексически соответствовали тексту.",
+  rule:`<b>Как понять, что нужно отрицание</b>
+<p>В ОГЭ приставку надо «увидеть» по смыслу. Подсказки в тексте:</p>
+<ul><li><b>but, however, although</b> — противопоставление: если в одной части хорошо, в другой часто «не».</li>
+<li><b>at first … but now</b> — сначала было одно, потом другое.</li>
+<li>Слова с отрицательным смыслом рядом: problem, harmful, worried, bad.</li></ul>
+<p>Прочитай предложение целиком и спроси себя: «здесь хорошо или плохо?»</p>`,
+  textTitle:"Phones at school",
+  paras:[`Some teenagers think that a day without a phone is [[29|POSSIBLE]]. However, many teachers [[30|AGREE]] with them. They say that using phones in class is [[31|EFFECTIVE]] for learning and can be [[32|HEALTH]] for children's eyes. At our school, phones were banned last year. At first the pupils were very [[33|HAPPY]] about the new rule, but now many of them find it [[34|SURPRISE]] useful.`],
+  answers:[["impossible"],["disagree"],["ineffective"],["unhealthy"],["unhappy"],["surprisingly"]],
+  notes:["«день без телефона невозможен»; im- перед p","However — учителя не согласны; глагол → dis-","учителя против телефонов → «неэффективно»; in-","вред для глаз → «вредно для здоровья»; un-","At first … but now — сначала были недовольны; un-","наречие перед прилагательным useful: surprising → surprisingly"]
+},
+{
+  id:"t45", nav:"4.4", title:"Задание 4.4 · формат ОГЭ (20–28)", type:"text",
+  instr:"Преобразуйте слова в скобках так, чтобы они грамматически соответствовали тексту.",
+  rule:`<b>Правило: условные предложения</b>
+<table class="stack"><tr><th>Тип</th><th>If-часть</th><th>Главная часть</th><th>Пример</th></tr>
+<tr><td>0 — всегда так</td><td>Present Simple</td><td>Present Simple</td><td>If you heat ice, it melts.</td></tr>
+<tr><td>1 — реально в будущем</td><td>Present Simple</td><td>will + V</td><td>If it snows, we will go skiing.</td></tr>
+<tr><td>2 — нереально сейчас</td><td>Past Simple (were)</td><td>would + V</td><td>If I knew his number, I would call him.</td></tr></table>
+<p><b>Главное правило:</b> после <b>if, when, unless</b> в значении будущего <b>will не ставится</b>: If it <b>rains</b> tomorrow (не will rain).</p>
+<p><b>I wish + Past Simple</b> — сожаление о настоящем: I wish I <b>lived</b> by the sea (жаль, что не живу). С be — <b>were</b>: I wish I <b>were</b> taller (was тоже допустимо).</p>
+<p>Ещё в тексте: местоимения после предлога (with <b>him</b>), пассив (was + V3), сравнительная степень (-er) и порядковые числительные (third).</p>`,
+  textTitle:"If I had a robot",
+  paras:[`If I [[20|HAVE]] a robot, it would do all my homework. My little brother [[21|THINK]] that robots are dangerous. He says that if robots [[22|BECOME]] too clever, they will rule the world. I don't agree with [[23|HE]]. Last week we [[24|WATCH]] a film about robots. The film [[25|MAKE]] in Hollywood ten years ago, but it still looks modern. I wish my brother [[26|BE]] more open-minded! Anyway, robots are becoming [[27|CHEAP]] every year, and the [[28|THREE]] generation of home robots is already on sale.`],
+  answers:[["had"],["thinks"],["become"],["him"],["watched"],["was made"],["were","was"],["cheaper"],["third"]],
+  notes:["2-й тип: if + Past Simple, would в главной части","факт в настоящем, he → -s","1-й тип: после if нет will, Present Simple","после предлога with — объектное местоимение","last week → Past Simple","фильм сняли (пассив), ten years ago → was + V3; make — made","I wish + Past Simple; с be — were (was тоже засчитывается)","сравнительная степень: cheap → cheaper","порядковое числительное: three → third"]
+},
+{
+  id:"t46", nav:"4.5", title:"Задание 4.5 · Лексика «Интернет и искусственный интеллект»", type:"sents",
+  instr:"Выучите слова, затем вставьте подходящие слова из таблицы в правильной форме.",
+  pre:"vocab",
+  items:[
+    ["A [[]] can answer your questions in a few seconds.",[["chatbot"]],"«чат-бот»"],
+    ["Not every website is [[]], so you should always [[]].",[["reliable"],["check the facts"]],"reliable — надёжный; to check the facts — проверять факты"],
+    ["Never share your password with strangers: remember about [[]].",[["online safety"]],"«безопасность в интернете»"],
+    ["I spend too much [[]] on my phone, especially on [[]].",[["screen time"],["social media"]],"screen time — время перед экраном; social media — соцсети"],
+    ["A [[]] can create pictures from a short text description.",[["neural network"]],"«нейросеть»"],
+    ["Some people believe [[]] and share it with their friends.",[["fake news"]],"«фейковые новости»"]
+  ]
+},
+{
+  id:"t47", nav:"4.6", title:"Задание 4.6 · Чтение (формат ОГЭ)", type:"choice",
+  instr:"Прочитайте текст. Определите, какие утверждения соответствуют содержанию текста (True), какие не соответствуют (False) и о чём в тексте не сказано (Not stated).",
+  rule:`<b>Как отличить False от Not stated</b>
+<ul><li><b>True</b> — в тексте сказано то же самое, часто другими словами.</li>
+<li><b>False</b> — в тексте сказано <b>противоположное</b>. Можно найти фразу, которая опровергает утверждение.</li>
+<li><b>Not stated</b> — в тексте <b>нет информации</b> об этом: ни «да», ни «нет».</li>
+<li>Осторожно со словами all, every, never, only: «в некоторых школах» ≠ «во всех школах» — это False.</li></ul>`,
+  pre:"reading",
+  opts:[["T","True"],["F","False"],["NS","Not stated"]],
+  items:[
+    ["1. People started using AI in everyday life many decades ago.","F","«Ten years ago, artificial intelligence seemed like something from a science fiction film»"],
+    ["2. People use AI assistants to plan their holidays.","T","«use AI assistants to … plan their holidays»"],
+    ["3. Teachers think that copying answers from a chatbot is a good way to learn.","F","«copying answers … does not help you learn anything»"],
+    ["4. In all schools, pupils must tell the teacher if they used AI.","F","«In some schools» — не во всех"],
+    ["5. Translators earn less money because of AI.","NS","сказано, что профессия может исчезнуть, о зарплате ничего"],
+    ["6. Companies need specialists who can test AI systems.","T","«companies already need specialists who can train and test AI systems»"],
+    ["7. Most chatbots are free.","NS","о цене чат-ботов в тексте ничего нет"]
+  ]
+},
+{
+  id:"t48", nav:"Д/З", title:"Домашнее задание", type:"info",
+  instr:"",
+  html:`<p>1) Выписать из таблицы словообразования все слова с приставками (un-, in-, im-, dis-, inter-) и выучить их.</p>
+<p>2) Дописать предложения:<br>If I didn't have a phone, … · If it rains tomorrow, … · If I were a teacher, … · I wish … · If I could live in any country, … · Unless I do my homework, …</p>`
+}
+];
+
+const VOCAB = [["artificial intelligence (AI)","искусственный интеллект (ИИ)"],["chatbot","чат-бот"],["neural network","нейросеть"],["device","устройство"],["data","данные"],["to search for","искать"],["reliable","надёжный, достоверный"],["to check the facts","проверять факты"],["fake news","фейковые новости"],["screen time","время перед экраном"],["social media","соцсети"],["online safety","безопасность в интернете"],["to download","скачивать"],["to think critically","мыслить критически"],["to invent","придумывать, изобретать"],["in everyday life","в повседневной жизни"]];
+
+const READING = `<div class="texttitle">Artificial intelligence in our lives</div><div class="text">
+<p>Ten years ago, artificial intelligence seemed like something from a science fiction film. Now it has become part of our everyday life. Millions of people use AI assistants to translate texts, plan their holidays and even write poems.</p>
+<p>Many students use chatbots to help them with their homework. A chatbot can explain a difficult topic in simple words. However, teachers warn that copying answers from a chatbot does not help you learn anything. In some schools, pupils have to tell the teacher if they used AI.</p>
+<p>AI is also changing the world of work. Some jobs, such as translators or call-centre operators, may disappear. At the same time, new professions are appearing: companies already need specialists who can train and test AI systems.</p>
+<p>Experts say that the most important thing is to think critically. AI tools sometimes make mistakes and even invent facts. That is why you should always check important information in reliable sources.</p></div>`;
+
+const STORE = "lesson4-oge-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e) { saved = {}; }
+function persist(){ try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch(e) {} }
+
+const norm = s => (s||"").toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g," ").trim();
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const width = arr => Math.max(6, Math.max(...arr.map(a=>a.length)) + 3);
+const results = {};
+
+function gapHTML(key, answers){
+  return `<input class="gap" data-key="${key}" style="width:${width(answers)}ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-label="ответ">`;
+}
+
+/* every task gets t.units: [{key, answers, label, note, kind:'gap'|'choice', correct}] */
+function render(){
+  const root = document.getElementById("tasks");
+  const nav = document.getElementById("jump");
+  root.innerHTML = ""; nav.innerHTML = "";
+  const hint = document.getElementById("nojsHint"); if (hint) hint.remove();
+  let maxTotal = 0;
+  TASKS.forEach(t => {
+    t.units = [];
+    const sec = document.createElement("section");
+    sec.className = "card"; sec.id = t.id;
+    let h = `<h2>${t.title}</h2>` + (t.instr ? `<p class="instr">${t.instr}</p>` : "");
+    if (t.rule) h += `<div class="rule">${t.rule}</div>`;
+    if (t.pre === "vocab") h += `<table class="vocab">${VOCAB.map(v=>`<tr><td>${v[0]}</td><td>${v[1]}</td></tr>`).join("")}</table>`;
+    if (t.pre === "reading") h += READING;
+    if (t.type === "list") {
+      h += `<ul class="list">` + t.items.map((it,i)=>{
+        const key=t.id+"_"+i; t.units.push({key,answers:it[1],label:`${i+1}. ${it[0]} → `,note:it[2],kind:"gap"});
+        return `<li><span class="w">${i+1}. ${it[0]} →</span>${gapHTML(key, it[1])}</li>`;}).join("") + `</ul>`;
+    } else if (t.type === "text") {
+      if (t.textTitle) h += `<div class="texttitle">${t.textTitle}</div>`;
+      let k = 0;
+      h += `<div class="text">` + t.paras.map(p => "<p>" + esc(p).replace(/\[\[(\d+)\|([^\]]+)\]\]/g, (m,num,base) => {
+        const i = k++; const key=t.id+"_"+i;
+        t.units.push({key,answers:t.answers[i],label:`(${num}) `,note:t.notes[i],kind:"gap"});
+        return `<span class="num">(${num})</span> ${gapHTML(key, t.answers[i])} <span class="base">(${base})</span>`;
+      }) + "</p>").join("") + `</div>`;
+    } else if (t.type === "sents") {
+      h += `<ol class="sents">` + t.items.map((it,i)=>{
+        let j = 0;
+        return `<li>${esc(it[0]).replace(/\[\[\]\]/g, () => {
+          const jj=j++; const key=`${t.id}_${i}_${jj}`; const ans=it[1][jj];
+          t.units.push({key,answers:ans,label:`${i+1}. `,note:jj===0?it[2]:"",kind:"gap",multi:it[1].length>1});
+          return gapHTML(key, ans);})}</li>`;}).join("") + `</ol>`;
+    } else if (t.type === "choice") {
+      h += `<ol class="sents tf" style="list-style:none;padding-left:0">` + t.items.map((it,i)=>{
+        const key=t.id+"_"+i; t.units.push({key,correct:it[1],label:it[0],note:it[2],kind:"choice"});
+        return `<li><span class="lbl">${esc(it[0])}</span>${it[3]?`<div class="mcopts">${it[3]}</div>`:""}<div class="opts ${t.optsClass||""}" data-key="${key}">${t.opts.map(o=>`<button type="button" data-v="${o[0]}">${o[1]}</button>`).join("")}</div></li>`;}).join("") + `</ol>`;
+    }
+    if (t.type === "info") { h += `<div class="info">${t.html}</div>`; sec.innerHTML = h; root.appendChild(sec); t.n = 0;
+      const a0 = document.createElement("a"); a0.href = "#"+t.id; a0.textContent = t.nav; a0.id = "nav_"+t.id; nav.appendChild(a0); return; }
+    h += `<div class="actions"><button type="button" class="primary" data-act="check">Проверить</button><button type="button" data-act="show">Показать ответы</button><button type="button" data-act="clear">Сбросить</button><span class="res"></span></div><div class="expl"></div>`;
+    sec.innerHTML = h;
+    root.appendChild(sec);
+    t.n = t.units.length; maxTotal += t.n;
+    const a = document.createElement("a"); a.href = "#"+t.id; a.textContent = t.nav; a.id = "nav_"+t.id; nav.appendChild(a);
+    sec.querySelector(".actions").addEventListener("click", e => {
+      const act = e.target.dataset && e.target.dataset.act; if (!act) return;
+      if (act === "check") check(t, sec, false);
+      if (act === "show") check(t, sec, true);
+      if (act === "clear") clearTask(t, sec);
+    });
+  });
+  document.getElementById("max").textContent = maxTotal;
+
+  document.querySelectorAll("input.gap").forEach(inp => {
+    if (saved[inp.dataset.key]) inp.value = saved[inp.dataset.key];
+    inp.addEventListener("input", () => {
+      saved[inp.dataset.key] = inp.value; persist();
+      inp.classList.remove("ok","bad");
+      const fx = inp.nextElementSibling; if (fx && fx.classList.contains("fix")) fx.remove();
+    });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const all = [...document.querySelectorAll("input.gap")];
+        const nx = all[all.indexOf(inp)+1]; if (nx) nx.focus(); else inp.blur();
+      }
+    });
+  });
+  document.querySelectorAll(".opts").forEach(box => {
+    const k = box.dataset.key;
+    if (saved[k]) { const b = box.querySelector(`[data-v="${saved[k]}"]`); if (b) b.classList.add("sel"); }
+    box.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      box.querySelectorAll("button").forEach(x => x.classList.remove("sel","ok","bad","right"));
+      b.classList.add("sel"); saved[k] = b.dataset.v; persist();
+    });
+  });
+}
+
+function check(t, sec, reveal){
+  let right = 0; const expl = [];
+  t.units.forEach(u => {
+    if (u.kind === "choice") {
+      const box = sec.querySelector(`.opts[data-key="${u.key}"]`);
+      const sel = box.querySelector(".sel");
+      box.querySelectorAll("button").forEach(x=>x.classList.remove("ok","bad","right"));
+      const ok = sel && sel.dataset.v === u.correct;
+      if (sel) sel.classList.add(ok ? "ok" : "bad");
+      if (ok) right++; else if (reveal) box.querySelector(`[data-v="${u.correct}"]`).classList.add("right");
+      expl.push(`<li><b>${esc(u.label)} — ${u.correct}</b>: ${u.note}</li>`);
+    } else {
+      const inp = sec.querySelector(`input[data-key="${u.key}"]`);
+      const ok = u.answers.map(norm).includes(norm(inp.value));
+      inp.classList.remove("ok","bad");
+      const old = inp.nextElementSibling; if (old && old.classList.contains("fix")) old.remove();
+      if (inp.value.trim() !== "" || reveal) inp.classList.add(ok ? "ok" : "bad");
+      if (ok) right++; else if (reveal) inp.insertAdjacentHTML("afterend", `<span class="fix">${esc(u.answers[0])}</span>`);
+      if (u.multi) {
+        if (u.note) { const all = t.units.filter(x=>x.label===u.label && x.multi).map(x=>x.answers[0]).join(" … "); expl.push(`<li><b>${u.label}${esc(all)}</b> — ${u.note}</li>`); }
+      } else expl.push(`<li><b>${esc(u.label)}${esc(u.answers.join(" / "))}</b> — ${u.note}</li>`);
+    }
+  });
+  if (t.extra) expl.push(`<li>${t.extra}</li>`);
+  const res = sec.querySelector(".res");
+  res.textContent = `${right} из ${t.n}`;
+  res.className = "res " + (right === t.n ? "good" : "mid");
+  const ex = sec.querySelector(".expl");
+  if (reveal) { ex.innerHTML = `<ul>${expl.join("")}</ul>`; ex.classList.add("show"); }
+  results[t.id] = right;
+  document.getElementById("nav_"+t.id).classList.toggle("done", right === t.n);
+  document.getElementById("total").textContent = Object.values(results).reduce((a,b)=>a+b,0);
+}
+
+function clearTask(t, sec){
+  sec.querySelectorAll("input.gap").forEach(inp => { inp.value = ""; inp.classList.remove("ok","bad"); delete saved[inp.dataset.key]; });
+  sec.querySelectorAll(".fix").forEach(x => x.remove());
+  sec.querySelectorAll(".opts").forEach(box => { box.querySelectorAll("button").forEach(x=>x.classList.remove("sel","ok","bad","right")); delete saved[box.dataset.key]; });
+  sec.querySelector(".res").textContent = "";
+  sec.querySelector(".expl").classList.remove("show");
+  delete results[t.id];
+  document.getElementById("nav_"+t.id).classList.remove("done");
+  document.getElementById("total").textContent = Object.values(results).reduce((a,b)=>a+b,0);
+  persist();
+}
+
+render();
+document.getElementById("resetAll").addEventListener("click", () => {
+  TASKS.forEach(t => clearTask(t, document.getElementById(t.id)));
+  saved = {}; persist(); window.scrollTo({top:0, behavior:"smooth"});
+});
+</script>
+</body>
+</html>
