@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meet the Alpaca</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: stage tabs with chunky tap targets */
+:root{
+ --bg:#EEF6FF; --card:#FFFFFF; --ink:#22224A; --muted:#62648A; --line:#DCE3F5;
+ --purple:#7C5CFF; --orange:#FF8A3D; --pink:#FF5C93; --green:#1FB57A; --yellow:#F5B700; --blue:#2F8CFF;
+ --soft:#F4F1FF; --ok:#16A06A; --ok-bg:#DDF7EA; --no:#E5484D; --no-bg:#FFE4E4;
+ --display:"Fredoka","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14162B;--card:#1E2140;--ink:#ECEBFF;--muted:#A9ABD3;--line:#30345C;--soft:#262A4F;--ok:#4BD898;--ok-bg:#173A2C;--no:#FF7B7F;--no-bg:#3D1F25;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14162B;--card:#1E2140;--ink:#ECEBFF;--muted:#A9ABD3;--line:#30345C;--soft:#262A4F;--ok:#4BD898;--ok-bg:#173A2C;--no:#FF7B7F;--no-bg:#3D1F25;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 var(--body);
+ background-image:radial-gradient(circle at 12px 12px,color-mix(in srgb,var(--purple) 12%,transparent) 2px,transparent 2.5px);background-size:28px 28px}
+#app{max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.eyebrow{margin:0;font:800 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(2.3rem,8vw,3.4rem)/1 var(--display);margin:6px 0 8px;color:var(--purple);text-wrap:balance}
+h1 span{color:var(--orange)}
+.lead{margin:0;color:var(--muted);font-weight:700}
+.star-box{background:var(--card);border:3px solid var(--yellow);border-radius:20px;padding:6px 18px;font-weight:800;box-shadow:0 5px 0 var(--yellow)}
+.star-box b{font:700 2.2rem var(--display);color:var(--yellow);font-variant-numeric:tabular-nums}.star-box span{color:var(--muted)}.star-box i{font-style:normal}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:8px;overflow-x:auto;padding:12px 2px;margin:14px 0 6px;background:var(--bg);scrollbar-width:none}
+.tab{--c:var(--purple);flex:0 0 auto;font:700 1.05rem var(--display);color:var(--c);background:var(--card);border:3px solid var(--c);border-radius:16px;padding:6px 14px;cursor:pointer;box-shadow:0 4px 0 var(--c)}
+.tab small{display:block;font:800 .7rem var(--body);letter-spacing:.04em;opacity:.8}
+.tab[aria-selected="true"]{background:var(--c);color:#fff;transform:translateY(2px);box-shadow:0 2px 0 var(--c)}
+.tab.done::after{content:" ★";color:var(--yellow)}
+.purple{--c:var(--purple)}.orange{--c:var(--orange)}.pink{--c:var(--pink)}.green{--c:var(--green)}.yellow{--c:var(--yellow)}.blue{--c:var(--blue)}
+.stage{display:grid;gap:16px}
+.bubble{display:flex;gap:12px;align-items:flex-start}
+.tick{width:96px;flex:0 0 auto}
+.tk-body{fill:var(--c)}.tk-face{fill:#fff}.tk-bell{fill:var(--c)}.tk-leg{stroke:var(--c);stroke-width:7;stroke-linecap:round}
+.tk-eye{fill:#22224A}.tk-mouth{fill:none;stroke:#22224A;stroke-width:4;stroke-linecap:round}.tk-hand{stroke:#22224A;stroke-width:4;stroke-linecap:round}.tk-cheek{fill:#FFB3C7}
+@media (prefers-reduced-motion:no-preference){.tick{animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px) rotate(-3deg)}}}
+.talk-b{position:relative;flex:1;min-width:0;background:var(--card);border:3px solid var(--c);border-radius:22px;padding:12px 16px}
+.talk-b::before{content:"";position:absolute;left:-14px;top:28px;border:12px solid transparent;border-right-color:var(--c);border-left:0}
+.say{margin:0 0 6px;font:700 1.3rem var(--display);color:var(--c)}
+.rule{font-size:.98rem}
+.mini{display:inline-block;margin:4px 4px 0 0;background:var(--soft);border-radius:10px;padding:2px 10px;font-size:.92rem}
+.mini.t1{background:color-mix(in srgb,var(--blue) 15%,var(--card))}.mini.t2{background:color-mix(in srgb,var(--orange) 18%,var(--card))}.mini.t3{background:color-mix(in srgb,var(--green) 18%,var(--card))}
+@media (max-width:520px){.tick{width:66px}.say{font-size:1.1rem}}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:16px 18px;box-shadow:0 6px 0 var(--line)}
+.card h3{margin:0 0 4px;font:700 1.35rem var(--display);display:flex;gap:10px;align-items:center}
+.card h3 b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;font-size:1.1rem;flex:0 0 auto}
+.hint{margin:0 0 10px;color:var(--muted);font-size:.95rem}
+.q-row{padding:12px 0;border-top:2px dashed var(--line)}
+.q-row:first-of-type{border-top:0}
+.q{margin:0 0 8px;font-weight:800;font-size:1.05rem}
+.gap{display:inline-block;min-width:3em;text-align:center;border-bottom:3px solid var(--c);color:var(--c);padding:0 4px}
+.gap.filled{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);border-radius:6px 6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:700 1rem var(--body);color:var(--ink);background:var(--card);border:2.5px solid var(--line);border-radius:14px;padding:8px 16px;cursor:pointer;box-shadow:0 4px 0 var(--line);transition:transform .1s}
+.opt:hover:not(:disabled){border-color:var(--c);transform:translateY(-2px)}
+.opt:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);box-shadow:0 4px 0 var(--ok)}
+.opt.no{background:var(--no-bg);border-color:var(--no);color:var(--no);text-decoration:line-through;box-shadow:none}
+.opt:disabled{cursor:default}.opt:disabled:not(.ok):not(.no){opacity:.5}
+@media (prefers-reduced-motion:no-preference){.opt.ok{animation:pop .35s}.opt.no,.answer.bad{animation:shake .3s}
+ @keyframes pop{50%{transform:scale(1.12)}}@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}}
+.pool,.answer{display:flex;flex-wrap:wrap;gap:8px;min-height:54px;padding:8px;border-radius:14px}
+.pool{background:var(--soft)}
+.answer{border:3px dashed var(--line);margin-top:8px}
+.answer:empty::before{content:"Нажимай слова по порядку…";color:var(--muted);align-self:center;padding-left:6px}
+.answer.ok{border:3px solid var(--ok);background:var(--ok-bg)}
+.word{font:700 1.05rem var(--display);color:var(--ink);background:var(--card);border:2.5px solid var(--c);border-radius:12px;padding:6px 14px;cursor:pointer;box-shadow:0 3px 0 var(--c)}
+.msg{margin:6px 0 0;font-weight:800;color:var(--c);min-height:1.4em}
+.talk{padding:10px 0;border-top:2px dashed var(--line)}.talk:first-of-type{border-top:0}
+.peek{font:800 .9rem var(--body);color:var(--c);background:transparent;border:2px solid var(--c);border-radius:999px;padding:4px 14px;cursor:pointer}
+.idea{margin-top:8px;background:var(--soft);border-radius:14px;padding:10px 14px}
+.idea b{color:var(--c)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pills span{background:color-mix(in srgb,var(--c) 15%,var(--card));border-radius:999px;padding:3px 12px;font-weight:700;font-size:.92rem}
+.steps{margin:6px 0;padding-left:24px;display:grid;gap:6px}.steps li::marker{font:700 1.1rem var(--display);color:var(--c)}
+.steps small{color:var(--muted);margin-left:6px}
+details.key{margin-top:12px;background:var(--soft);border:2px dashed var(--line);border-radius:14px;padding:10px 14px}
+details.key summary{cursor:pointer;font-weight:800;color:var(--c)}details.key ul{padding-left:20px}details.key li{margin-bottom:6px}
+.win{display:flex;gap:14px;align-items:center;background:var(--ok-bg);border:3px solid var(--ok);border-radius:22px;padding:10px 16px}
+.win .tick{width:70px;--c:var(--ok)}.win b{display:block;font:700 1.5rem var(--display);color:var(--ok)}
+.spark{position:fixed;z-index:50;pointer-events:none;color:var(--yellow);font-size:1.3rem;animation:spark .7s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+.tutor{margin-top:28px;color:var(--muted);font-size:.85rem}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+.fctr{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fchip{font:700 .95rem var(--body);color:var(--ink);background:var(--card);border:2.5px solid var(--line);border-radius:999px;padding:5px 14px;cursor:pointer}
+.fchip.on{background:color-mix(in srgb,var(--c) 18%,var(--card));border-color:var(--c)}
+.fseg{display:inline-flex;border:2.5px solid var(--c);border-radius:12px;overflow:hidden}
+.fseg button{font:700 .9rem var(--body);background:var(--card);color:var(--ink);border:0;padding:6px 12px;cursor:pointer}
+.fseg button.on{background:var(--c);color:#fff}
+.fstage{display:grid;gap:12px}
+.fprog{display:flex;gap:14px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}.fprog .k{color:var(--ok)}.fprog .d{color:var(--no)}
+.fcard{position:relative;height:240px;border:0;padding:0;background:none;cursor:pointer;perspective:1000px;font:inherit;color:var(--ink)}
+.fcard .face{position:absolute;inset:0;border-radius:24px;display:grid;place-content:center;justify-items:center;gap:8px;padding:20px;text-align:center;backface-visibility:hidden;transition:transform .5s}
+.fcard .f{background:var(--card);border:3px solid var(--c);box-shadow:0 6px 0 var(--c)}
+.fcard .bk{background:var(--c);color:#fff;transform:rotateY(180deg)}
+.fcard.flip .f{transform:rotateY(180deg)}.fcard.flip .bk{transform:rotateY(360deg)}
+.fcard small{font:800 .75rem var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.fcard b{font:700 clamp(1.9rem,8vw,2.7rem)/1.1 var(--display)}
+.fcard em{font-size:.85rem;color:var(--muted);font-style:normal}
+@media (prefers-reduced-motion:reduce){.fcard .face{transition:none}}
+.fbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fbtns .opt{text-align:center;font-size:1.05rem}
+.no-b{color:var(--no)!important;border-color:var(--no)!important}.yes-b{color:var(--ok)!important;border-color:var(--ok)!important}
+.fend{background:var(--soft);border-radius:18px;padding:14px 16px;display:grid;gap:8px}.fend>b{font:700 2.4rem var(--display);color:var(--c)}.fend p{margin:0;font-weight:700}
+.opt.pick{background:color-mix(in srgb,var(--c) 18%,var(--card));border-color:var(--c)}
+
+.fcard .tr{font:700 1.1rem var(--body);opacity:.9}
+.vtable{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin-top:10px}
+.vtable div{display:grid;grid-template-columns:auto auto;gap:0 8px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:6px 10px}
+.vtable b{font:700 1.05rem var(--display)}.vtable span{font-weight:800;color:var(--c)}.vtable i{grid-column:1/-1;font-style:normal;color:var(--muted);font-size:.85rem}
+
+.vfab{position:fixed;z-index:30;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font:700 1.1rem var(--display);color:#fff;background:var(--orange);border:0;border-radius:20px;padding:10px 18px;box-shadow:0 5px 0 #C9601A;cursor:pointer;display:grid;line-height:1.05}
+.vfab small{font:800 .7rem var(--body);opacity:.9}
+.vov{position:fixed;inset:0;z-index:40;background:rgba(20,22,43,.45);display:grid;align-items:end;justify-items:center;padding:16px}
+.vpanel{--c:var(--orange);width:100%;max-width:760px;max-height:82vh;overflow:auto;background:var(--bg);border-radius:24px;border:3px solid var(--orange);padding:14px 16px 18px}
+.vhead{display:flex;justify-content:space-between;align-items:center}.vhead b{font:700 1.5rem var(--display);color:var(--orange)}
+.vclose{font:800 1.1rem var(--body);width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.vletters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.vletters button{font:800 .95rem var(--body);min-width:36px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.vletters button.on{background:var(--orange);border-color:var(--orange);color:#fff}
+#app{padding-bottom:90px}
+
+/* Design: squared school notebook — grid paper, bookmark tabs, rules on taped sticky notes, highlighter accents */
+:root{--bg:#F7FAFF;--card:#FFFFFF;--ink:#1E2A5A;--muted:#5C6790;--line:#D4DDF2;--soft:#EEF3FF;
+ --purple:#6C63FF;--orange:#FF7A45;--pink:#F0517A;--green:#13A97B;--yellow:#E0A800;--blue:#2F7BEA;
+ --hl:#FFE45C;--grid:#DCE6F8;--display:"Comfortaa","Trebuchet MS",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121729;--card:#1B2240;--ink:#E8ECFF;--muted:#A3ACD6;--line:#2E3863;--soft:#232B52;--hl:#8A7A1E;--grid:#1C2440}}
+:root[data-theme="dark"]{--bg:#121729;--card:#1B2240;--ink:#E8ECFF;--muted:#A3ACD6;--line:#2E3863;--soft:#232B52;--hl:#8A7A1E;--grid:#1C2440}
+body{background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+h1{font-family:var(--display);font-weight:700;color:var(--ink)}
+h1 span{color:var(--ink);background:linear-gradient(transparent 55%,var(--hl) 55%);padding:0 4px}
+.star-box{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:12px}
+.star-box b{color:var(--orange)}
+nav{gap:4px;padding-bottom:0;border-bottom:3px solid var(--ink)}
+.tab{border:2px solid var(--ink);border-bottom:0;border-radius:12px 12px 0 0;box-shadow:none;background:var(--card);color:var(--ink);font-family:var(--display);transform:none;padding:8px 14px 6px}
+.tab small{color:var(--c);opacity:1}
+.tab[aria-selected="true"]{background:var(--c);color:#fff;transform:none;box-shadow:none;padding-top:12px}
+.tab[aria-selected="true"] small{color:#fff}
+.tab.done::after{content:" ✓";color:var(--green)}
+.tab[aria-selected="true"].done::after{color:#fff}
+.stage{padding-top:14px}
+.sticky{position:relative;background:#FFF4A8;color:#2A2A1A;border-radius:4px 4px 18px 4px;padding:26px 20px 16px;box-shadow:0 8px 16px rgba(30,42,90,.14);transform:rotate(-.6deg);margin:6px 4px 8px}
+.sticky::before{content:"";position:absolute;top:-12px;left:50%;width:110px;height:26px;transform:translateX(-50%) rotate(2deg);background:rgba(160,200,255,.6);border-radius:3px}
+.sticky-tag{display:inline-block;font:700 .78rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:#7A6A00;margin-bottom:6px}
+.sticky .rule{font-size:1.02rem}
+.sticky .mini{background:rgba(255,255,255,.7);color:#2A2A1A}
+.sticky .mini.t1,.sticky .mini.t2,.sticky .mini.t3{background:rgba(255,255,255,.85)}
+.card{border:2px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink)}
+.card h3{font-family:var(--display)}
+.card h3 b{border-radius:8px;background:var(--c)}
+.opt{border:2px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink)}
+.opt:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);border-color:var(--ink)}
+.opt:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.opt.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);box-shadow:3px 3px 0 var(--ok)}
+.opt.no{box-shadow:none}
+.gap{border-bottom-color:var(--ink);color:var(--ink)}
+.gap.filled{background:var(--hl);color:var(--ink);border-color:var(--ink)}
+.word{border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-family:var(--display)}
+.pool{background:var(--soft);border:2px dashed var(--line)}
+.vtable div{border:2px solid var(--line)}
+.vtable span{color:var(--orange)}
+.win{border:2px solid var(--ok);border-radius:16px;box-shadow:5px 5px 0 var(--ok)}
+.medal{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--hl);color:var(--ink);font-size:1.8rem;border:2px solid var(--ink);flex:0 0 auto}
+.win b{font-family:var(--display)}
+.vfab{background:var(--ink);box-shadow:4px 4px 0 var(--orange);border-radius:14px;font-family:var(--display)}
+.vpanel{border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);border-radius:18px}
+.vhead b{font-family:var(--display);color:var(--ink)}
+.peek{border-width:2px}
+details.key summary{color:var(--ink)}
+
+.vlink{display:inline-block;margin-top:8px;font:700 1rem var(--display);color:#fff!important;background:#E53935;border:2px solid #1E2A5A;border-radius:12px;padding:8px 16px;text-decoration:none;box-shadow:3px 3px 0 #1E2A5A;transform:rotate(.6deg)}
+.reading{display:grid;gap:10px;font-size:1.07rem;line-height:1.65}
+.reading p{margin:0;background:var(--soft);border-radius:12px;padding:10px 14px}
+.reading mark{background:var(--hl);color:var(--ink);padding:0 2px;border-radius:3px}
+.vtable div{grid-template-columns:1fr}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+const h=(t,c,x)=>{const e=document.createElement(t); if(c) e.className=c; if(x!=null) e.innerHTML=x; return e;};
+const shuffle=a=>{a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;};
+const C=["walk","help","play"];
+const VIDEO="https://www.youtube.com/watch?v=LwksecDU7XE";
+const WORDS_A=[["alpaca","альпака"],["llama","лама"],["the Andes","Анды (горы в Южной Америке)"],["South America","Южная Америка"],["Peru, Bolivia, Chile","Перу, Боливия, Чили"],
+["herd","стадо"],["wool","шерсть (пряжа)"],["fleece","шерсть животного, руно"],["soft","мягкий"],["thick","толстый, густой"],
+["keep / raise animals","держать, разводить животных"],["thousands of years","тысячи лет"],["smaller than","меньше, чем"],["delicate","нежный, хрупкий"],
+["friendly","дружелюбный"],["social","любит быть с другими"],["alone","один, в одиночестве"],["hum","мычать, тихо гудеть"],["spit","плеваться"],["carry","нести, перевозить"]];
+const STAGES=[
+{id:"words", title:"New Words", min:10, color:"purple",
+ tick:`Сегодня смотрим видео про <b>альпак</b>! Сначала новые слова.<br>
+  <b>Шаг 1.</b> Запиши слова в тетрадь: английское слово и перевод.<br>
+  <b>Шаг 2.</b> Прочитай их вслух вместе с репетитором.<br>
+  <b>Шаг 3.</b> Проверь себя в задании B.`,
+ tasks:[
+  {type:"html", title:"Write these words down", hint:"20 слов, которые встретятся в видео и в тексте.", html:()=>`<div class="vtable">${WORDS_A.map(w=>`<div><b>${w[0]}</b><i>${w[1]}</i></div>`).join("")}</div>`},
+  {type:"choice", title:"Quick check", hint:"Можно подсматривать в тетрадь!", items:[
+   {q:"herd", o:["стадо","шерсть","гора"], a:0},
+   {q:"soft", o:["толстый","мягкий","маленький"], a:1},
+   {q:"spit", o:["прыгать","плеваться","спать"], a:1},
+   {q:"friendly", o:["дружелюбный","одинокий","нежный"], a:0},
+   {q:"alone", o:["вместе","один","везде"], a:1},
+   {q:"carry", o:["нести","мычать","держать"], a:0}
+  ]}
+ ]},
+{id:"guess", title:"Before Watching", min:5, color:"orange",
+ tick:`Перед просмотром <b>угадай</b>! Это не проверка: просто скажи, как ты думаешь. После видео узнаем, кто был прав.<br>
+  Отвечай словами <b>I think…</b> или <b>Maybe…</b>`,
+ tasks:[
+  {type:"talk", title:"What do you think?", hint:"Ответь вслух. Ответ откроем после видео: нажми «Show an idea» в конце урока или прямо сейчас, если интересно!", items:[
+   {q:"Where do alpacas live: in Africa, in South America or in Russia?", m:"In <b>South America</b>, high in the <b>Andes Mountains</b>: in Peru, Bolivia and Chile."},
+   {q:"Why do people keep alpacas: for milk, for wool or for meat?", m:"Mostly for their <b>wool</b>. It is very soft and warm."},
+   {q:"Who is bigger: an alpaca or a llama?", m:"A <b>llama</b> is bigger. Alpacas are <b>smaller</b>."},
+   {q:"Do alpacas like to live alone or in a group?", m:"In a group! A group of alpacas is called a <b>herd</b>."}
+  ]}
+ ]},
+{id:"watch1", title:"Watch #1", min:5, color:"pink",
+ tick:`<b>Первый просмотр без пауз.</b> Не старайся понять каждое слово! Слушай главное: <b>где</b> живут альпаки и <b>зачем</b> их держат.<br>
+  <a class="vlink" href="${VIDEO}" target="_blank" rel="noopener">▶ Open the video on YouTube</a>`,
+ tasks:[
+  {type:"choice", title:"The main idea", items:[
+   {q:"What is the video about?", o:["about alpacas","about cows on a farm","about mountains in Russia"], a:0},
+   {q:"Where are alpacas from?", o:["North America","South America","Asia"], a:1},
+   {q:"Which mountains do they live in?", o:["the Alps","the Andes","the Himalayas"], a:1},
+   {q:"What other animal does the video compare alpacas with?", o:["a sheep","a llama","a horse"], a:1}
+  ]}
+ ]},
+{id:"watch2", title:"Watch #2: Pauses", min:15, color:"green",
+ tick:`<b>Второй просмотр с паузами.</b> Репетитор останавливает видео после каждой части. Вы вместе переводите и отвечаете на вопросы этой части.<br>
+  <a class="vlink" href="${VIDEO}" target="_blank" rel="noopener">▶ Open the video on YouTube</a>`,
+ tasks:[
+  {type:"html", title:"Pause plan", hint:"Для репетитора: делайте паузу, когда видео заканчивает рассказывать об одной теме. Порядок частей в видео может немного отличаться.", html:()=>`
+   <ol class="steps">
+    <li><b>Пауза 1: где живут альпаки.</b> Переведите вместе: <i>high in the Andes Mountains, South America, Peru, Bolivia, Chile</i>. → вопросы C</li>
+    <li><b>Пауза 2: шерсть.</b> Переведите: <i>people raised them for thousands of years, soft wool</i>. → вопросы D</li>
+    <li><b>Пауза 3: альпака и лама.</b> Переведите: <i>smaller, more delicate</i>. → вопросы E</li>
+    <li><b>Пауза 4: характер.</b> Переведите: <i>social, friendly, they live in herds</i>. → вопросы F</li>
+   </ol>`},
+  {type:"choice", title:"Part 1: Home", items:[
+   {q:"Alpacas live ___ in the mountains.", o:["high","low","under"], a:0},
+   {q:"Which country is NOT an alpaca home?", o:["Peru","Bolivia","Canada"], a:2}
+  ]},
+  {type:"choice", title:"Part 2: Wool", items:[
+   {q:"People keep alpacas for their…", o:["milk","wool","eggs"], a:1},
+   {q:"How long have people raised alpacas?", o:["for ten years","for a hundred years","for thousands of years"], a:2},
+   {q:"Alpaca wool is very…", o:["soft","hard","wet"], a:0}
+  ]},
+  {type:"choice", title:"Part 3: Alpaca or llama?", items:[
+   {q:"Alpacas are ___ than llamas.", o:["bigger","smaller","taller"], a:1},
+   {q:"Alpacas are more ___ than llamas.", o:["delicate","dangerous","angry"], a:0}
+  ]},
+  {type:"choice", title:"Part 4: Character", items:[
+   {q:"Alpacas are…", o:["friendly and social","angry and lonely","lazy and slow"], a:0},
+   {q:"A group of alpacas is called a…", o:["family","herd","team"], a:1}
+  ]}
+ ]},
+{id:"text", title:"Read the Text", min:12, color:"yellow",
+ tick:`Теперь читаем текст про альпак: в нём то же, что в видео, и немного больше. Читай вслух, по одному абзацу. Незнакомые слова ищи в своей тетради!`,
+ tasks:[
+  {type:"html", title:"Meet the Alpaca", html:()=>`<div class="reading">
+   <p><b>1.</b> Alpacas are animals from <mark>South America</mark>. They live high in the <mark>Andes</mark> Mountains in Peru, Bolivia and Chile. It is very cold there, but alpacas have <mark>thick</mark>, <mark>soft</mark> <mark>fleece</mark>, so they stay warm.</p>
+   <p><b>2.</b> Thousands of years ago, people in the Andes started to keep alpacas. They wanted their <mark>wool</mark>. Alpaca wool is very soft and warm. People make hats, scarves and jumpers from it.</p>
+   <p><b>3.</b> Alpacas look like <mark>llamas</mark>, but they are <mark>smaller</mark>. A llama is taller and stronger than an alpaca, so people use llamas to <mark>carry</mark> bags in the mountains. Alpacas are more <mark>delicate</mark>. Their ears are short, but llama ears are long and look like bananas!</p>
+   <p><b>4.</b> Alpacas are <mark>friendly</mark> and <mark>social</mark> animals. They live in groups called <mark>herds</mark>. They don't like to be <mark>alone</mark>. When an alpaca is happy or worried, it <mark>hums</mark>. And when it is angry… it <mark>spits</mark>!</p></div>`},
+  {type:"choice", title:"True or false?", items:[
+   {q:"Alpacas live in the Andes Mountains.", o:["True","False"], a:0},
+   {q:"It is very hot in the Andes.", o:["True","False"], a:1},
+   {q:"People make jumpers from alpaca wool.", o:["True","False"], a:0},
+   {q:"Alpacas are bigger than llamas.", o:["True","False"], a:1},
+   {q:"Llamas have ears like bananas.", o:["True","False"], a:0},
+   {q:"Alpacas like to be alone.", o:["True","False"], a:1}
+  ]},
+  {type:"choice", title:"Grammar in the text", hint:"Найди ответ в тексте.", items:[
+   {q:"Paragraph 2: people ___ to keep alpacas thousands of years ago.", o:["start","started","are starting"], a:1},
+   {q:"Why <i>started</i> and not <i>start</i>?", o:["Because it happened in the past.","Because it happens every day.","Because it is happening now."], a:0},
+   {q:"A llama is ___ than an alpaca.", o:["tall","taller","the tallest"], a:1},
+   {q:"Alpacas ___ in herds. (always, every day)", o:["live","lived","are living"], a:0},
+   {q:"Look! The alpaca ___! It's angry!", o:["spits","is spitting","spitted"], a:1}
+  ]},
+  {type:"choice", title:"Why? Because…", items:[
+   {q:"Why don't alpacas get cold?", o:["Because they have thick, soft fleece.","Because they live in houses.","Because they hum."], a:0},
+   {q:"Why do people use llamas to carry bags?", o:["Because llamas are taller and stronger.","Because llamas are smaller.","Because llamas spit."], a:0},
+   {q:"Why did people start to keep alpacas?", o:["Because they wanted their wool.","Because they wanted milk.","Because alpacas are funny."], a:0}
+  ]}
+ ]},
+{id:"talk", title:"Let's Talk!", min:13, color:"blue",
+ tick:`Говорим про альпак! Используй новые слова и фразы: <b>I think… because…</b>, <b>smaller / bigger than</b>, <b>Thousands of years ago, people…</b>`,
+ tasks:[
+  {type:"talk", title:"Your opinion", hint:"Ответь полным предложением. Потом спроси репетитора: <i>What about you?</i>", items:[
+   {q:"Would you like an alpaca as a pet? Why or why not?", m:"Yes, I would, <b>because</b> alpacas are <b>friendly</b> and very cute. <b>But</b> I live in a flat, so it's impossible!"},
+   {q:"Alpaca or llama: which do you like more? Why?", m:"<b>I think</b> alpacas are cuter <b>because</b> they are <b>smaller</b> and their <b>fleece</b> is very <b>soft</b>."},
+   {q:"What can people make from wool? What do you have from wool?", m:"People make hats, scarves and socks. I have a <b>wool</b> jumper from my grandma."},
+   {q:"Alpacas are social. Are you social, or do you like to be alone sometimes?", m:"I'm <b>social</b>, I love my friends. <b>But</b> sometimes I like to be <b>alone</b> with a book."}
+  ]},
+  {type:"html", title:"Role play: the alpaca farm", hint:"Ты работаешь на альпачьей ферме в Перу. Репетитор — турист. Проведи экскурсию: расскажи про альпак и ответь на вопросы.", html:()=>`
+   <div class="pills"><span>Welcome to our farm!</span><span>Our alpacas live…</span><span>They are smaller than…</span><span>We make … from their wool.</span><span>Be careful, they can spit!</span><span>This alpaca is humming because…</span></div>
+   <details class="key"><summary>Для репетитора: вопросы туриста</summary><ul>
+    <li><i>Where do the alpacas live? Is it cold here?</i></li>
+    <li><i>Is this a llama or an alpaca? How do you know?</i></li>
+    <li><i>Can I touch it? Is it friendly?</i></li>
+    <li><i>What do you make from the wool? Can I buy a hat?</i></li>
+    <li><i>Why is that alpaca humming?</i></li>
+    <li><i>Oh no! Why did it spit at me?!</i></li></ul>
+    <p>Если ответы короткие, спросите: <i>Why? · Tell me more!</i> Потом поменяйтесь ролями.</p></details>`},
+  {type:"html", title:"Tell the story (1 minute)", hint:"Перескажи видео и текст своими словами. Используй план и слова из тетради.", html:()=>`
+   <ol class="steps"><li><i>Alpacas live in… It is… there, but they have…</i></li><li><i>Thousands of years ago, people…</i></li>
+   <li><i>Alpacas are smaller than… Llamas are…</i></li><li><i>Alpacas are friendly. They live in… When they are angry, they…</i></li></ol>`}
+ ]}
+];
+
+function rWyr(t,box){ t.items.forEach(([a,b])=>{ const row=h("div","q-row"); row.append(h("p","q","Would you rather…"));
+  const g=h("div","opts"); const p=h("p","hint",""); [a,b].forEach(x=>{ const btn=h("button","opt",x); btn.type="button";
+    btn.onclick=()=>{ g.querySelectorAll(".opt").forEach(z=>z.classList.remove("pick")); btn.classList.add("pick"); p.innerHTML=`Скажи: <i>I'd rather ${x} because…</i>`; }; g.append(btn); });
+  row.append(g,p); box.append(row); }); }
+
+const TICK=`<svg viewBox="0 0 120 130" class="tick" aria-hidden="true">
+ <line x1="30" y1="112" x2="20" y2="126" class="tk-leg"/><line x1="90" y1="112" x2="100" y2="126" class="tk-leg"/>
+ <circle cx="28" cy="22" r="14" class="tk-bell"/><circle cx="92" cy="22" r="14" class="tk-bell"/>
+ <circle cx="60" cy="68" r="50" class="tk-body"/><circle cx="60" cy="68" r="40" class="tk-face"/>
+ <circle cx="46" cy="58" r="6" class="tk-eye"/><circle cx="74" cy="58" r="6" class="tk-eye"/>
+ <circle cx="48" cy="56" r="2" fill="#fff"/><circle cx="76" cy="56" r="2" fill="#fff"/>
+ <path d="M44 80 Q60 94 76 80" class="tk-mouth"/>
+ <line x1="60" y1="68" x2="60" y2="38" class="tk-hand"/><line x1="60" y1="68" x2="80" y2="74" class="tk-hand"/>
+ <circle cx="36" cy="76" r="5" class="tk-cheek"/><circle cx="84" cy="76" r="5" class="tk-cheek"/></svg>`;
+
+let stars=0, totalStars=0; const stageGot={}, stageTot={};
+const app=$("#app");
+app.innerHTML=`<header class="top"><div><p class="eyebrow">Video lesson · In the Mountains · 60 минут</p><h1>Meet the<br><span>Alpaca!</span></h1>
+ <p class="lead">Урок по видео про альпак: новые слова, два просмотра с паузами, текст и разговор. Только мышкой!</p></div>
+ <div class="star-box"><b id="stars">0</b><span>/ <i id="tstars">0</i> ★</span></div></header>
+ <nav id="tabs"></nav><main id="main"></main>
+ <p class="tutor">Для репетитора: план пауз во вкладке «Watch #2», вопросы туриста для ролевой игры во вкладке Let's Talk!</p>`;
+const tabs=$("#tabs"), main=$("#main"); const views={};
+
+function star(stage,btn){ stars++; stageGot[stage]=(stageGot[stage]||0)+1; $("#stars").textContent=stars;
+  burst(btn); if(stageGot[stage]===stageTot[stage]) done(stage); }
+function burst(el){ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return; const r=el.getBoundingClientRect();
+  for(let i=0;i<6;i++){ const s=h("span","spark","★"); s.style.left=(r.left+r.width/2)+"px"; s.style.top=(r.top+r.height/2)+"px";
+    s.style.setProperty("--dx",(Math.cos(i)*50)+"px"); s.style.setProperty("--dy",(Math.sin(i*1.7)*40-30)+"px"); document.body.append(s); setTimeout(()=>s.remove(),700); } }
+function done(stage){ const v=views[stage]; tabs.querySelector(`[data-id="${stage}"]`).classList.add("done");
+  const b=h("div","win",`<div class="medal">★</div><div><b>Stage complete!</b><span>Ты молодец! Переходи к следующему этапу.</span></div>`); v.append(b); }
+const say=(sid,txt)=>{ const s=views[sid]&&views[sid].querySelector(".bubble .say"); if(s){ s.innerHTML=txt; } };
+const PRAISE=["Great!","Super!","Well done!","Yes!","Cool!","Brilliant!","Perfect!"];
+
+function rChoice(t,box,sid){
+  t.items.forEach(it=>{ totalStars++; stageTot[sid]=(stageTot[sid]||0)+1;
+    const row=h("div","q-row"+(t.story?" story":"")); row.append(h("p","q",it.q.replace(/___/g,'<span class="gap">?</span>')));
+    const g=h("div","opts");
+    shuffle(it.o.map((o,j)=>[o,j])).forEach(([o,j])=>{ const b=h("button","opt",o); b.type="button";
+      b.onclick=()=>{ if(j===it.a){ b.classList.add("ok"); g.querySelectorAll("button").forEach(x=>x.disabled=true);
+          const parts=o.split(" … "); row.querySelectorAll(".gap").forEach((gp,i)=>{ gp.textContent=parts[i]||parts[0]; gp.classList.add("filled"); });
+          star(sid,b); say(sid,PRAISE[Math.floor(Math.random()*PRAISE.length)]); }
+        else { b.classList.add("no"); b.disabled=true; say(sid,"Oops! Try again!"); } };
+      g.append(b); });
+    row.append(g); box.append(row); });
+}
+function rOrder(t,box,sid){ totalStars++; stageTot[sid]=(stageTot[sid]||0)+1;
+  const pool=h("div","pool"), ans=h("div","answer"), msg=h("p","msg","");
+  const mk=w=>{ const b=h("button","word",w); b.type="button"; b.onclick=()=>{ if(box.classList.contains("solved")) return; (b.parentNode===pool?ans:pool).append(b); check(); }; return b; };
+  const check=()=>{ if(pool.children.length) { msg.textContent=""; return; }
+    const ok=[...ans.children].map(x=>x.textContent).join(" ")===t.words.join(" ");
+    if(ok){ box.classList.add("solved"); ans.classList.add("ok"); msg.textContent="Perfect question!"; star(sid,ans); }
+    else { ans.classList.add("bad"); msg.textContent="Not yet! Нажми на слово, чтобы вернуть его."; setTimeout(()=>ans.classList.remove("bad"),600); } };
+  shuffle(t.words).forEach(w=>pool.append(mk(w)));
+  box.append(pool,ans,msg);
+}
+function rTalk(t,box){ t.items.forEach(it=>{ const row=h("div","talk"); row.append(h("p","q",it.q));
+  const b=h("button","peek","Show an idea"); b.type="button"; const m=h("div","idea",it.m); m.hidden=true;
+  b.onclick=()=>{ m.hidden=!m.hidden; b.textContent=m.hidden?"Show an idea":"Hide"; }; row.append(b,m); box.append(row); }); }
+
+STAGES.forEach((s,si)=>{
+  const b=h("button","tab "+s.color,`<small>${si+1} · ${s.min} min</small>${s.title}`); b.type="button"; b.dataset.id=s.id;
+  b.onclick=()=>show(s.id,true); tabs.append(b);
+  const v=h("section","stage "+s.color); v.hidden=true; views[s.id]=v;
+  v.append(h("div","sticky",`<span class="sticky-tag">Правило</span><div class="rule">${s.tick}</div>`));
+  s.tasks.forEach((t,ti)=>{ const box=h("section","card");
+    box.append(h("h3",null,`<b>${String.fromCharCode(65+ti)}</b>${t.title}`)); if(t.hint) box.append(h("p","hint",t.hint));
+    if(t.type==="wyr") rWyr(t,box); else if(t.type==="choice") rChoice(t,box,s.id); else if(t.type==="order") rOrder(t,box,s.id); else if(t.type==="talk") rTalk(t,box); else box.insertAdjacentHTML("beforeend",t.html());
+    v.append(box); });
+  main.append(v);
+});
+$("#tstars").textContent=totalStars;
+function show(id,scroll){ Object.entries(views).forEach(([k,v])=>v.hidden=k!==id); tabs.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.id===id)); if(scroll) main.scrollIntoView({block:"start",behavior:"smooth"}); }
+let st=location.hash.slice(1); show(views[st]?st:"words",false);
+
+</script>
+</body>
+</html>
