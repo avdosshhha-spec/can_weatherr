@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Machine</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: stage tabs with chunky tap targets */
+:root{
+ --bg:#EEF6FF; --card:#FFFFFF; --ink:#22224A; --muted:#62648A; --line:#DCE3F5;
+ --purple:#7C5CFF; --orange:#FF8A3D; --pink:#FF5C93; --green:#1FB57A; --yellow:#F5B700; --blue:#2F8CFF;
+ --soft:#F4F1FF; --ok:#16A06A; --ok-bg:#DDF7EA; --no:#E5484D; --no-bg:#FFE4E4;
+ --display:"Fredoka","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14162B;--card:#1E2140;--ink:#ECEBFF;--muted:#A9ABD3;--line:#30345C;--soft:#262A4F;--ok:#4BD898;--ok-bg:#173A2C;--no:#FF7B7F;--no-bg:#3D1F25;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14162B;--card:#1E2140;--ink:#ECEBFF;--muted:#A9ABD3;--line:#30345C;--soft:#262A4F;--ok:#4BD898;--ok-bg:#173A2C;--no:#FF7B7F;--no-bg:#3D1F25;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 var(--body);
+ background-image:radial-gradient(circle at 12px 12px,color-mix(in srgb,var(--purple) 12%,transparent) 2px,transparent 2.5px);background-size:28px 28px}
+#app{max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.eyebrow{margin:0;font:800 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(2.3rem,8vw,3.4rem)/1 var(--display);margin:6px 0 8px;color:var(--purple);text-wrap:balance}
+h1 span{color:var(--orange)}
+.lead{margin:0;color:var(--muted);font-weight:700}
+.star-box{background:var(--card);border:3px solid var(--yellow);border-radius:20px;padding:6px 18px;font-weight:800;box-shadow:0 5px 0 var(--yellow)}
+.star-box b{font:700 2.2rem var(--display);color:var(--yellow);font-variant-numeric:tabular-nums}.star-box span{color:var(--muted)}.star-box i{font-style:normal}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:8px;overflow-x:auto;padding:12px 2px;margin:14px 0 6px;background:var(--bg);scrollbar-width:none}
+.tab{--c:var(--purple);flex:0 0 auto;font:700 1.05rem var(--display);color:var(--c);background:var(--card);border:3px solid var(--c);border-radius:16px;padding:6px 14px;cursor:pointer;box-shadow:0 4px 0 var(--c)}
+.tab small{display:block;font:800 .7rem var(--body);letter-spacing:.04em;opacity:.8}
+.tab[aria-selected="true"]{background:var(--c);color:#fff;transform:translateY(2px);box-shadow:0 2px 0 var(--c)}
+.tab.done::after{content:" ★";color:var(--yellow)}
+.purple{--c:var(--purple)}.orange{--c:var(--orange)}.pink{--c:var(--pink)}.green{--c:var(--green)}.yellow{--c:var(--yellow)}.blue{--c:var(--blue)}
+.stage{display:grid;gap:16px}
+.bubble{display:flex;gap:12px;align-items:flex-start}
+.tick{width:96px;flex:0 0 auto}
+.tk-body{fill:var(--c)}.tk-face{fill:#fff}.tk-bell{fill:var(--c)}.tk-leg{stroke:var(--c);stroke-width:7;stroke-linecap:round}
+.tk-eye{fill:#22224A}.tk-mouth{fill:none;stroke:#22224A;stroke-width:4;stroke-linecap:round}.tk-hand{stroke:#22224A;stroke-width:4;stroke-linecap:round}.tk-cheek{fill:#FFB3C7}
+@media (prefers-reduced-motion:no-preference){.tick{animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px) rotate(-3deg)}}}
+.talk-b{position:relative;flex:1;min-width:0;background:var(--card);border:3px solid var(--c);border-radius:22px;padding:12px 16px}
+.talk-b::before{content:"";position:absolute;left:-14px;top:28px;border:12px solid transparent;border-right-color:var(--c);border-left:0}
+.say{margin:0 0 6px;font:700 1.3rem var(--display);color:var(--c)}
+.rule{font-size:.98rem}
+.mini{display:inline-block;margin:4px 4px 0 0;background:var(--soft);border-radius:10px;padding:2px 10px;font-size:.92rem}
+.mini.t1{background:color-mix(in srgb,var(--blue) 15%,var(--card))}.mini.t2{background:color-mix(in srgb,var(--orange) 18%,var(--card))}.mini.t3{background:color-mix(in srgb,var(--green) 18%,var(--card))}
+@media (max-width:520px){.tick{width:66px}.say{font-size:1.1rem}}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:16px 18px;box-shadow:0 6px 0 var(--line)}
+.card h3{margin:0 0 4px;font:700 1.35rem var(--display);display:flex;gap:10px;align-items:center}
+.card h3 b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;font-size:1.1rem;flex:0 0 auto}
+.hint{margin:0 0 10px;color:var(--muted);font-size:.95rem}
+.q-row{padding:12px 0;border-top:2px dashed var(--line)}
+.q-row:first-of-type{border-top:0}
+.q{margin:0 0 8px;font-weight:800;font-size:1.05rem}
+.gap{display:inline-block;min-width:3em;text-align:center;border-bottom:3px solid var(--c);color:var(--c);padding:0 4px}
+.gap.filled{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);border-radius:6px 6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:700 1rem var(--body);color:var(--ink);background:var(--card);border:2.5px solid var(--line);border-radius:14px;padding:8px 16px;cursor:pointer;box-shadow:0 4px 0 var(--line);transition:transform .1s}
+.opt:hover:not(:disabled){border-color:var(--c);transform:translateY(-2px)}
+.opt:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);box-shadow:0 4px 0 var(--ok)}
+.opt.no{background:var(--no-bg);border-color:var(--no);color:var(--no);text-decoration:line-through;box-shadow:none}
+.opt:disabled{cursor:default}.opt:disabled:not(.ok):not(.no){opacity:.5}
+@media (prefers-reduced-motion:no-preference){.opt.ok{animation:pop .35s}.opt.no,.answer.bad{animation:shake .3s}
+ @keyframes pop{50%{transform:scale(1.12)}}@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}}
+.pool,.answer{display:flex;flex-wrap:wrap;gap:8px;min-height:54px;padding:8px;border-radius:14px}
+.pool{background:var(--soft)}
+.answer{border:3px dashed var(--line);margin-top:8px}
+.answer:empty::before{content:"Нажимай слова по порядку…";color:var(--muted);align-self:center;padding-left:6px}
+.answer.ok{border:3px solid var(--ok);background:var(--ok-bg)}
+.word{font:700 1.05rem var(--display);color:var(--ink);background:var(--card);border:2.5px solid var(--c);border-radius:12px;padding:6px 14px;cursor:pointer;box-shadow:0 3px 0 var(--c)}
+.msg{margin:6px 0 0;font-weight:800;color:var(--c);min-height:1.4em}
+.talk{padding:10px 0;border-top:2px dashed var(--line)}.talk:first-of-type{border-top:0}
+.peek{font:800 .9rem var(--body);color:var(--c);background:transparent;border:2px solid var(--c);border-radius:999px;padding:4px 14px;cursor:pointer}
+.idea{margin-top:8px;background:var(--soft);border-radius:14px;padding:10px 14px}
+.idea b{color:var(--c)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pills span{background:color-mix(in srgb,var(--c) 15%,var(--card));border-radius:999px;padding:3px 12px;font-weight:700;font-size:.92rem}
+.steps{margin:6px 0;padding-left:24px;display:grid;gap:6px}.steps li::marker{font:700 1.1rem var(--display);color:var(--c)}
+.steps small{color:var(--muted);margin-left:6px}
+details.key{margin-top:12px;background:var(--soft);border:2px dashed var(--line);border-radius:14px;padding:10px 14px}
+details.key summary{cursor:pointer;font-weight:800;color:var(--c)}details.key ul{padding-left:20px}details.key li{margin-bottom:6px}
+.win{display:flex;gap:14px;align-items:center;background:var(--ok-bg);border:3px solid var(--ok);border-radius:22px;padding:10px 16px}
+.win .tick{width:70px;--c:var(--ok)}.win b{display:block;font:700 1.5rem var(--display);color:var(--ok)}
+.spark{position:fixed;z-index:50;pointer-events:none;color:var(--yellow);font-size:1.3rem;animation:spark .7s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+.tutor{margin-top:28px;color:var(--muted);font-size:.85rem}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+.fctr{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fchip{font:700 .95rem var(--body);color:var(--ink);background:var(--card);border:2.5px solid var(--line);border-radius:999px;padding:5px 14px;cursor:pointer}
+.fchip.on{background:color-mix(in srgb,var(--c) 18%,var(--card));border-color:var(--c)}
+.fseg{display:inline-flex;border:2.5px solid var(--c);border-radius:12px;overflow:hidden}
+.fseg button{font:700 .9rem var(--body);background:var(--card);color:var(--ink);border:0;padding:6px 12px;cursor:pointer}
+.fseg button.on{background:var(--c);color:#fff}
+.fstage{display:grid;gap:12px}
+.fprog{display:flex;gap:14px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}.fprog .k{color:var(--ok)}.fprog .d{color:var(--no)}
+.fcard{position:relative;height:240px;border:0;padding:0;background:none;cursor:pointer;perspective:1000px;font:inherit;color:var(--ink)}
+.fcard .face{position:absolute;inset:0;border-radius:24px;display:grid;place-content:center;justify-items:center;gap:8px;padding:20px;text-align:center;backface-visibility:hidden;transition:transform .5s}
+.fcard .f{background:var(--card);border:3px solid var(--c);box-shadow:0 6px 0 var(--c)}
+.fcard .bk{background:var(--c);color:#fff;transform:rotateY(180deg)}
+.fcard.flip .f{transform:rotateY(180deg)}.fcard.flip .bk{transform:rotateY(360deg)}
+.fcard small{font:800 .75rem var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.fcard b{font:700 clamp(1.9rem,8vw,2.7rem)/1.1 var(--display)}
+.fcard em{font-size:.85rem;color:var(--muted);font-style:normal}
+@media (prefers-reduced-motion:reduce){.fcard .face{transition:none}}
+.fbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fbtns .opt{text-align:center;font-size:1.05rem}
+.no-b{color:var(--no)!important;border-color:var(--no)!important}.yes-b{color:var(--ok)!important;border-color:var(--ok)!important}
+.fend{background:var(--soft);border-radius:18px;padding:14px 16px;display:grid;gap:8px}.fend>b{font:700 2.4rem var(--display);color:var(--c)}.fend p{margin:0;font-weight:700}
+.opt.pick{background:color-mix(in srgb,var(--c) 18%,var(--card));border-color:var(--c)}
+
+.fcard .tr{font:700 1.1rem var(--body);opacity:.9}
+.vtable{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin-top:10px}
+.vtable div{display:grid;grid-template-columns:auto auto;gap:0 8px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:6px 10px}
+.vtable b{font:700 1.05rem var(--display)}.vtable span{font-weight:800;color:var(--c)}.vtable i{grid-column:1/-1;font-style:normal;color:var(--muted);font-size:.85rem}
+
+.vfab{position:fixed;z-index:30;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font:700 1.1rem var(--display);color:#fff;background:var(--orange);border:0;border-radius:20px;padding:10px 18px;box-shadow:0 5px 0 #C9601A;cursor:pointer;display:grid;line-height:1.05}
+.vfab small{font:800 .7rem var(--body);opacity:.9}
+.vov{position:fixed;inset:0;z-index:40;background:rgba(20,22,43,.45);display:grid;align-items:end;justify-items:center;padding:16px}
+.vpanel{--c:var(--orange);width:100%;max-width:760px;max-height:82vh;overflow:auto;background:var(--bg);border-radius:24px;border:3px solid var(--orange);padding:14px 16px 18px}
+.vhead{display:flex;justify-content:space-between;align-items:center}.vhead b{font:700 1.5rem var(--display);color:var(--orange)}
+.vclose{font:800 1.1rem var(--body);width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.vletters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.vletters button{font:800 .95rem var(--body);min-width:36px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.vletters button.on{background:var(--orange);border-color:var(--orange);color:#fff}
+#app{padding-bottom:90px}
+
+/* Design: squared school notebook — grid paper, bookmark tabs, rules on taped sticky notes, highlighter accents */
+:root{--bg:#F7FAFF;--card:#FFFFFF;--ink:#1E2A5A;--muted:#5C6790;--line:#D4DDF2;--soft:#EEF3FF;
+ --purple:#6C63FF;--orange:#FF7A45;--pink:#F0517A;--green:#13A97B;--yellow:#E0A800;--blue:#2F7BEA;
+ --hl:#FFE45C;--grid:#DCE6F8;--display:"Comfortaa","Trebuchet MS",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121729;--card:#1B2240;--ink:#E8ECFF;--muted:#A3ACD6;--line:#2E3863;--soft:#232B52;--hl:#8A7A1E;--grid:#1C2440}}
+:root[data-theme="dark"]{--bg:#121729;--card:#1B2240;--ink:#E8ECFF;--muted:#A3ACD6;--line:#2E3863;--soft:#232B52;--hl:#8A7A1E;--grid:#1C2440}
+body{background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+h1{font-family:var(--display);font-weight:700;color:var(--ink)}
+h1 span{color:var(--ink);background:linear-gradient(transparent 55%,var(--hl) 55%);padding:0 4px}
+.star-box{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:12px}
+.star-box b{color:var(--orange)}
+nav{gap:4px;padding-bottom:0;border-bottom:3px solid var(--ink)}
+.tab{border:2px solid var(--ink);border-bottom:0;border-radius:12px 12px 0 0;box-shadow:none;background:var(--card);color:var(--ink);font-family:var(--display);transform:none;padding:8px 14px 6px}
+.tab small{color:var(--c);opacity:1}
+.tab[aria-selected="true"]{background:var(--c);color:#fff;transform:none;box-shadow:none;padding-top:12px}
+.tab[aria-selected="true"] small{color:#fff}
+.tab.done::after{content:" ✓";color:var(--green)}
+.tab[aria-selected="true"].done::after{color:#fff}
+.stage{padding-top:14px}
+.sticky{position:relative;background:#FFF4A8;color:#2A2A1A;border-radius:4px 4px 18px 4px;padding:26px 20px 16px;box-shadow:0 8px 16px rgba(30,42,90,.14);transform:rotate(-.6deg);margin:6px 4px 8px}
+.sticky::before{content:"";position:absolute;top:-12px;left:50%;width:110px;height:26px;transform:translateX(-50%) rotate(2deg);background:rgba(160,200,255,.6);border-radius:3px}
+.sticky-tag{display:inline-block;font:700 .78rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:#7A6A00;margin-bottom:6px}
+.sticky .rule{font-size:1.02rem}
+.sticky .mini{background:rgba(255,255,255,.7);color:#2A2A1A}
+.sticky .mini.t1,.sticky .mini.t2,.sticky .mini.t3{background:rgba(255,255,255,.85)}
+.card{border:2px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink)}
+.card h3{font-family:var(--display)}
+.card h3 b{border-radius:8px;background:var(--c)}
+.opt{border:2px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink)}
+.opt:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);border-color:var(--ink)}
+.opt:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.opt.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);box-shadow:3px 3px 0 var(--ok)}
+.opt.no{box-shadow:none}
+.gap{border-bottom-color:var(--ink);color:var(--ink)}
+.gap.filled{background:var(--hl);color:var(--ink);border-color:var(--ink)}
+.word{border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-family:var(--display)}
+.pool{background:var(--soft);border:2px dashed var(--line)}
+.vtable div{border:2px solid var(--line)}
+.vtable span{color:var(--orange)}
+.win{border:2px solid var(--ok);border-radius:16px;box-shadow:5px 5px 0 var(--ok)}
+.medal{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--hl);color:var(--ink);font-size:1.8rem;border:2px solid var(--ink);flex:0 0 auto}
+.win b{font-family:var(--display)}
+.vfab{background:var(--ink);box-shadow:4px 4px 0 var(--orange);border-radius:14px;font-family:var(--display)}
+.vpanel{border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);border-radius:18px}
+.vhead b{font-family:var(--display);color:var(--ink)}
+.peek{border-width:2px}
+details.key summary{color:var(--ink)}
+
+.tx{font-size:1.12rem;line-height:2.3;background:var(--soft);border-radius:14px;padding:12px 16px}
+.tok{font:700 1.05rem var(--body);color:var(--ink);background:var(--hl);border:2px dashed var(--ink);border-radius:8px;padding:0 8px;cursor:pointer;line-height:1.6}
+.tok.cur{border-style:solid;box-shadow:3px 3px 0 var(--ink);background:var(--card)}
+.tok.done{background:var(--ok-bg);color:var(--ok);border:2px solid var(--ok);cursor:default}
+.tok.kept::after{content:" ✓"}
+.picker{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:10px 12px;box-shadow:4px 4px 0 var(--ink)}
+.pk-l{font:700 1.05rem var(--display)}
+.txdone{margin-top:10px;background:var(--ok-bg);border:2px solid var(--ok);border-radius:12px;padding:10px 14px;color:var(--ok)}
+.tt{display:inline-block;font:800 .72rem var(--body);letter-spacing:.06em;border-radius:6px;padding:2px 8px;margin-right:6px;color:#fff;vertical-align:2px}
+.tt.t1{background:var(--blue)}.tt.t2{background:var(--orange)}.tt.t3{background:var(--green)}
+.yday{background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:10px 14px}.yday ul{margin:6px 0 0;padding-left:20px}
+.sticky mark{background:var(--hl);padding:0 3px;border-radius:3px}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+const h=(t,c,x)=>{const e=document.createElement(t); if(c) e.className=c; if(x!=null) e.innerHTML=x; return e;};
+const shuffle=a=>{a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;};
+const C=["walk","help","play"];
+const VERBS=[["be","was / were","быть"],["become","became","становиться"],["begin","began","начинать"],["break","broke","ломать"],["bring","brought","приносить"],
+["build","built","строить"],["buy","bought","покупать"],["catch","caught","ловить"],["choose","chose","выбирать"],["come","came","приходить"],
+["cut","cut","резать"],["do","did","делать"],["draw","drew","рисовать"],["drink","drank","пить"],["drive","drove","водить машину"],
+["eat","ate","есть"],["fall","fell","падать"],["feel","felt","чувствовать"],["find","found","находить"],["fly","flew","летать"],
+["forget","forgot","забывать"],["get","got","получать"],["give","gave","давать"],["go","went","идти, ехать"],["have","had","иметь"],
+["hear","heard","слышать"],["know","knew","знать"],["leave","left","уходить, оставлять"],["lose","lost","терять"],["make","made","делать, создавать"],
+["meet","met","встречать"],["pay","paid","платить"],["put","put","класть"],["read","read","читать"],["ride","rode","ездить (верхом, на велосипеде)"],
+["run","ran","бежать"],["say","said","сказать"],["see","saw","видеть"],["sell","sold","продавать"],["sing","sang","петь"],
+["sit","sat","сидеть"],["sleep","slept","спать"],["speak","spoke","говорить"],["swim","swam","плавать"],["take","took","брать"],
+["teach","taught","учить (кого-то)"],["tell","told","рассказывать"],["think","thought","думать"],["win","won","побеждать"],["write","wrote","писать"]];
+
+const WORDS=[[1, "skin", "кожа"], [1, "hair", "волосы"], [1, "touch", "трогать, касаться"], [1, "dirt", "грязь"], [1, "sweat", "пот; потеть"], [1, "wash", "мыть(ся)"], [1, "protect", "защищать"], [1, "stand up", "вставать, подниматься"], [1, "rainy", "дождливый"], [1, "everywhere", "везде"], [2, "bone", "кость"], [2, "skeleton", "скелет"], [2, "joint", "сустав"], [2, "elbow", "локоть"], [2, "knee", "колено"], [2, "kick", "пинать, бить ногой"], [2, "grow", "расти"], [2, "tall", "высокий (рост)"], [2, "helmet", "шлем"], [2, "pads", "защитные накладки"], [3, "muscle", "мышца"], [3, "pull", "тянуть"], [3, "move", "двигать(ся)"], [3, "exercise", "физические упражнения, спорт"], [3, "strong", "сильный, крепкий"], [3, "heart", "сердце"], [3, "ride a bicycle", "кататься на велосипеде"], [3, "row a boat", "грести на лодке"], [3, "type", "вид, тип"], [3, "favorite", "любимый"], [4, "blink", "моргать"], [4, "world", "мир"], [4, "around", "вокруг"], [4, "open", "открывать(ся)"], [4, "close", "закрывать(ся)"], [4, "listen to", "слушать"], [4, "hear", "слышать"], [4, "street", "улица"], [4, "sunglasses", "солнечные очки"], [4, "loud", "громкий"], [4, "minute", "минута"], [5, "farm", "ферма"], [5, "farmer", "фермер"], [5, "crop", "урожай, с/х культура"], [5, "field", "поле"], [5, "plough", "пахать"], [5, "seed", "семя"], [5, "harvest", "урожай, сбор урожая"], [5, "cattle", "крупный рогатый скот"], [5, "barn", "сарай, коровник"], [5, "hay", "сено"], [5, "ranch", "ранчо"], [5, "wool", "шерсть"], [5, "fleece", "руно, овечья шерсть"], [5, "shear", "стричь (овец)"], [5, "lamb", "ягнёнок"], [5, "poultry", "домашняя птица"], [5, "feather", "перо"], [5, "goose", "гусь"], [5, "free-range", "свободного выгула"], [5, "fish farm", "рыбная ферма"], [6, "hide", "прятать(ся)"], [6, "camouflage", "маскировка"], [6, "colour", "цвет"], [6, "change", "менять(ся)"], [6, "shape", "форма"], [6, "pattern", "узор"], [6, "spots", "пятна"], [6, "stripes", "полоски"], [6, "leaf", "лист"], [6, "look like", "быть похожим"], [6, "insect", "насекомое"], [6, "octopus", "осьминог"], [6, "chameleon", "хамелеон"], [6, "snow", "снег"], [6, "sand", "песок"]];
+const WTOP={1:"Your Body",2:"Your Body",3:"Your Body",4:"Your Body",5:"Farms",6:"Camouflage"};
+function rFlash(t,box){
+  let topics=new Set(["Farms","Camouflage","Your Body","Mountains"]), dir="ru", deck=[], pos=0, know=0, dont=[];
+  const ctr=h("div","fctr");
+  const chips=h("div","pills fchips"); ["Farms","Camouflage","Your Body","Mountains"].forEach(n=>{ const b=h("button","fchip on",n); b.type="button";
+    b.onclick=()=>{ if(topics.has(n)&&topics.size===1) return; topics.has(n)?topics.delete(n):topics.add(n); b.classList.toggle("on"); start(); }; chips.append(b); });
+  const seg=h("div","fseg"); [["ru","RU → EN"],["en","EN → RU"]].forEach(([k,l])=>{ const b=h("button",k===dir?"on":"",l); b.type="button";
+    b.onclick=()=>{ dir=k; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); start(); }; seg.append(b); });
+  ctr.append(chips,seg); const stage=h("div","fstage"); box.append(ctr,stage);
+  function start(list){ deck=shuffle(list||WORDS.filter(w=>topics.has(WTOP[w[0]]))).slice(0,list?999:20); pos=0; know=0; dont=[]; card(); }
+  function card(){ stage.innerHTML="";
+    if(pos>=deck.length) return end();
+    const w=deck[pos], front=dir==="ru"?w[2]:w[1], back=dir==="ru"?w[1]:w[2];
+    stage.append(h("div","fprog",`<span>${pos+1} / ${deck.length}</span><span class="k">✓ ${know}</span><span class="d">✗ ${dont.length}</span>`));
+    const c=h("button","fcard",`<div class="face f"><small>${WTOP[w[0]]}</small><b>${front}</b><em>Нажми, чтобы перевернуть</em></div><div class="face bk"><small>${front}</small><b>${back}</b></div>`); c.type="button";
+    const row=h("div","fbtns"); const n=h("button","opt no-b","✗ Не знаю"), y=h("button","opt yes-b","✓ Знаю"); n.type=y.type="button"; n.disabled=y.disabled=true;
+    c.onclick=()=>{ c.classList.toggle("flip"); n.disabled=y.disabled=false; };
+    n.onclick=()=>{ dont.push(w); pos++; card(); }; y.onclick=()=>{ know++; burst(y); pos++; card(); };
+    row.append(n,y); stage.append(c,row); }
+  function end(){ const r=h("div","fend",`<b>${know} / ${deck.length}</b><p>${dont.length?"Повтори эти слова:":"Ты знаешь все слова! Super!"}</p>${dont.length?`<div class="pills">${dont.map(w=>`<span>${w[1]} — ${w[2]}</span>`).join("")}</div>`:""}`);
+    const a=h("div","opts"); if(dont.length){ const b=h("button","opt","Повторить незнакомые"); b.type="button"; const d=[...dont]; b.onclick=()=>start(d); a.append(b); }
+    const b2=h("button","opt","Новые 20 карточек"); b2.type="button"; b2.onclick=()=>start(); a.append(b2); r.append(a); stage.append(r); }
+  start();
+}
+WORDS.push(...[["mountain","гора"],["high","высокий"],["Earth's crust","земная кора"],["volcano","вулкан"],["hot rock","раскалённая порода"],["dangerous","опасный"],["millions of years","миллионы лет"],["road","дорога"],["transportation","транспорт"],["electricity","электричество"],["rock","камень, скала"],["terrace","терраса"],["rice","рис"],["golden eagle","беркут"],["nest","гнездо"],["wing","крыло"],["fur","мех"],["snow leopard","снежный барс"],["paw","лапа"],["ice","лёд"]].map(w=>[8,w[0],w[1]]));
+WTOP[8]="Mountains";
+
+const STAGES=[
+{id:"flip", title:"Word Flip", min:10, color:"purple",
+ tick:`Разминка для памяти! Смотри на слово, вспомни перевод и <b>нажми на карточку</b>. Честно отмечай: <b>Знаю</b> или <b>Не знаю</b>.<br>
+  Сверху можно выбрать темы и направление: <b>RU → EN</b> или <b>EN → RU</b>.`,
+ tasks:[{type:"flash", title:"Flip cards: all our topics"}]},
+{id:"machine", title:"Time Machine", min:15, color:"orange",
+ tick:`<b>Машина времени!</b> Этот рассказ про <b>обычный день</b> (Present Simple). Отправь его <b>в прошлое</b>: в прошлое воскресенье!<br>
+  Нажимай на каждое <mark>выделенное слово</mark> и выбирай, во что оно превращается.<br>
+  <span class="mini t1">Every day → <b>Last Sunday</b></span> <span class="mini t1">Today → <b>That day</b></span> <span class="mini">gets → <b>got</b></span> <span class="mini">milks → <b>milked</b></span><br>
+  Неправильные глаголы ищи в таблице: кнопка <b>Verbs</b> внизу справа.`,
+ tasks:[{type:"transform", title:"A day at Grandpa's farm → Last Sunday", hint:"Нажми на выделенное слово, внизу появятся варианты. Когда всё превратится, прочитай новый рассказ вслух!",
+  text:`{Every day|Last Sunday|Every week|Tomorrow} Grandpa {gets|got|getted|is getting} up at six o'clock. He {milks|milked|milking|milk} the cows and {feeds|fed|feeded|is feeding} the hens. {Today|That day|Now|Tomorrow} it {is|was|were|is being} cold, so he {wears|wore|weared|is wearing} his big warm coat. Grandma {makes|made|maked|making} pancakes, and I {help|helped|helpt|am helping} her. After breakfast, we {go|went|goed|gone} to the field. The sheep {eat|ate|eated|are eating} grass, and the lambs {run|ran|runned|are running} around. I {take|took|taked|am taking} lots of photos. In the evening, we {are|were|was|are being} tired but happy.`}]},
+{id:"reverse", title:"Live Report", min:8, color:"pink",
+ tick:`А теперь <b>наоборот</b>! Этот рассказ про то, что было <b>вчера</b>. Преврати его в <b>репортаж прямо сейчас</b> (Present Continuous): ты стоишь в горах с микрофоном!<br>
+  <span class="mini t2">Yesterday → <b>Right now</b></span> <span class="mini t2">climbed → <b>are climbing</b></span>`,
+ tasks:[{type:"transform", title:"A trip to the mountains → LIVE!", hint:"Нажимай на выделенные слова. Потом прочитай репортаж вслух, как настоящий журналист!",
+  text:`{Yesterday|Right now|Last week|Every day} we {climbed|are climbing|climb|climbing} a big mountain. My dad {carried|is carrying|carries|carry} a heavy bag. My sister {took|is taking|takes|taked} photos of the snow. The sun {was|is|are|were} very bright, so we {wore|are wearing|wear|weared} sunglasses. Wow! A golden eagle {flew|is flying|flies|flying} over us! I {felt|am feeling|feel|felted} very happy!`}]},
+{id:"chameleon", title:"Chameleon", min:7, color:"green",
+ tick:`Предложение-<b>хамелеон</b> меняет «цвет», когда меняется время! Найди слово-подсказку и выбери форму.<br>
+  <span class="mini t1"><b>ALWAYS</b>: every day, usually</span> <span class="mini t2"><b>NOW</b>: Look!, right now</span> <span class="mini t3"><b>PAST</b>: yesterday, last…, ago</span>`,
+ tasks:[
+  {type:"choice", title:"The octopus", items:[
+   {q:'<span class="tt t1">ALWAYS</span> An octopus ___ colour to hide.', o:["changes","is changing","changed"], a:0},
+   {q:'<span class="tt t2">NOW</span> Look! The octopus ___ colour!', o:["changes","is changing","changed"], a:1},
+   {q:'<span class="tt t3">PAST</span> Yesterday the octopus ___ colour three times.', o:["changes","is changing","changed"], a:2}]},
+  {type:"choice", title:"The snow leopard", items:[
+   {q:'<span class="tt t1">ALWAYS</span> Snow leopards usually ___ at night.', o:["hunt","are hunting","hunted"], a:0},
+   {q:'<span class="tt t2">NOW</span> Shh! The snow leopard ___ right now.', o:["hunts","is hunting","hunted"], a:1},
+   {q:'<span class="tt t3">PAST</span> Last night it ___ for six hours.', o:["hunts","is hunting","hunted"], a:2}]},
+  {type:"choice", title:"My heart", hint:"Осторожно: beat — неправильный глагол, и в прошедшем он не меняется: beat → beat!", items:[
+   {q:'<span class="tt t1">ALWAYS</span> My heart ___ about 80 times a minute.', o:["beats","is beating","beat"], a:0},
+   {q:'<span class="tt t2">NOW</span> I\'m running, so my heart ___ very fast!', o:["beats","is beating","beat"], a:1},
+   {q:'<span class="tt t3">PAST</span> After PE yesterday, my heart ___ very fast.', o:["beats","is beating","beat"], a:2}]},
+  {type:"choice", title:"The farmer", items:[
+   {q:'<span class="tt t1">ALWAYS</span> The farmer ___ the sheep every summer.', o:["shears","is shearing","sheared"], a:0},
+   {q:'<span class="tt t2">NOW</span> Look! He ___ a sheep now.', o:["shears","is shearing","sheared"], a:1},
+   {q:'<span class="tt t3">PAST</span> Two days ago he ___ ten sheep!', o:["shears","is shearing","sheared"], a:2}]}
+ ]},
+{id:"diary", title:"Broken Diary", min:8, color:"yellow",
+ tick:`Ой! В дневнике Кристины <b>5 ошибок</b> во временах. Нажимай на <mark>выделенные глаголы</mark> по очереди. Если глагол правильный, выбирай <b>✓ OK</b>. Если неправильный, выбирай исправление.<br>
+  Смотри на слова-подсказки: <b>yesterday, now, every weekend</b>.`,
+ tasks:[{type:"transform", title:"My zoo diary", hint:"Проверь каждый выделенный глагол.",
+  text:`Yesterday I {go|went|goes|going} to the zoo with my class. We {saw|=|see|seed} a snow leopard. It {sleep|slept|sleeps|sleeping} on a big rock. Its paws {were|=|was|are} very big! Then it {wake|woke|wakes|waked} up and {looked|=|look|looks} at us. Now I {write|am writing|writes|wrote} my diary. Every weekend I {am drawing|draw|drew|draws} animals in my notebook, and my teacher {says|=|said|saying} it's a great hobby!`}]},
+{id:"sort", title:"Time Sorter", min:5, color:"blue",
+ tick:`Разложи слова-подсказки по <b>трём коробкам</b>: <span class="mini t1"><b>ALWAYS</b> (обычно)</span> <span class="mini t2"><b>NOW</b> (сейчас)</span> <span class="mini t3"><b>PAST</b> (в прошлом)</span>`,
+ tasks:[{type:"choice", title:"Which box?", items:[
+  {q:"every morning", o:["ALWAYS","NOW","PAST"], a:0},{q:"Look!", o:["ALWAYS","NOW","PAST"], a:1},
+  {q:"two days ago", o:["ALWAYS","NOW","PAST"], a:2},{q:"at the moment", o:["ALWAYS","NOW","PAST"], a:1},
+  {q:"usually", o:["ALWAYS","NOW","PAST"], a:0},{q:"last winter", o:["ALWAYS","NOW","PAST"], a:2},
+  {q:"right now", o:["ALWAYS","NOW","PAST"], a:1},{q:"on Sundays", o:["ALWAYS","NOW","PAST"], a:0},
+  {q:"yesterday evening", o:["ALWAYS","NOW","PAST"], a:2},{q:"Listen!", o:["ALWAYS","NOW","PAST"], a:1},
+  {q:"in 2020", o:["ALWAYS","NOW","PAST"], a:2},{q:"never", o:["ALWAYS","NOW","PAST"], a:0}]}]},
+{id:"talk", title:"Let's Talk!", min:7, color:"purple",
+ tick:`Говорим во всех трёх временах! Помни слова-подсказки: <b>usually</b>, <b>right now</b>, <b>yesterday</b>.`,
+ tasks:[
+  {type:"html", title:"One thing, three times", hint:"Выбери тему и скажи о ней 3 предложения: как обычно, что сейчас и что было вчера.", html:()=>`
+   <div class="pills"><span>my cat / my pet</span><span>my mum</span><span>the weather</span><span>my best friend</span><span>a snow leopard</span><span>my grandpa</span></div>
+   <ol class="steps"><li><i>Usually my cat sleeps a lot.</i> <small>always</small></li><li><i>Right now it is sleeping on my bed.</i> <small>now</small></li><li><i>Yesterday it slept on my homework!</i> <small>past</small></li></ol>`},
+  {type:"html", title:"Farm: yesterday and today", hint:"Репетитор рассказывает, что на ферме <b>сегодня</b>. Ты смотришь на свою карточку и говоришь, что было <b>вчера</b>. Начинай: <i>But yesterday…</i>", html:()=>`
+   <div class="yday"><b>Yesterday at the farm</b><ul>
+    <li>rainy and cold</li><li>the cows → in the barn</li><li>Grandpa → feed the hens</li><li>the lamb → sleep all day</li><li>Grandma → make soup</li><li>the dog → run after a duck</li></ul></div>
+   <details class="key"><summary>Для репетитора: что на ферме сегодня</summary><ul>
+    <li><i>Today it's sunny and warm.</i> → <i>But yesterday it was rainy and cold.</i></li>
+    <li><i>Right now the cows are in the field.</i> → <i>But yesterday they were in the barn.</i></li>
+    <li><i>Grandpa is milking the cows.</i> → <i>Yesterday he fed the hens.</i></li>
+    <li><i>The lamb is running and jumping.</i> → <i>Yesterday it slept all day.</i></li>
+    <li><i>Grandma is making pancakes.</i> → <i>Yesterday she made soup.</i></li>
+    <li><i>The dog is sleeping.</i> → <i>Yesterday it ran after a duck.</i></li></ul>
+    <p>Потом поменяйтесь: она описывает «сегодня» по своей фантазии, вы — «вчера».</p></details>`}
+ ]}
+];
+
+function rTransform(t,box,sid){
+  const wrap=h("div","tx"); const picker=h("div","picker"); picker.hidden=true;
+  const parts=t.text.split(/(\{[^}]+\})/);
+  let tokens=[];
+  parts.forEach(p=>{ if(p.startsWith("{")){ const f=p.slice(1,-1).split("|"); const orig=f[0], ans=f[1]==="="?orig:f[1];
+      const opts=f[1]==="="?["✓ OK",...f.slice(2)]:f.slice(1); const correct=f[1]==="="?"✓ OK":f[1];
+      const b=h("button","tok",orig); b.type="button"; b.dataset.ans=ans; totalStars++; stageTot[sid]=(stageTot[sid]||0)+1;
+      const tok={b,orig,ans,opts,correct,done:false}; tokens.push(tok);
+      b.onclick=()=>open(tok); wrap.append(b); }
+    else wrap.append(document.createTextNode(p)); });
+  let cur=null;
+  function open(tok){ if(tok.done) return; tokens.forEach(x=>x.b.classList.remove("cur")); tok.b.classList.add("cur"); cur=tok;
+    picker.hidden=false; picker.innerHTML=""; picker.append(h("span","pk-l",`<b>${tok.orig}</b> →`));
+    shuffle(tok.opts).forEach(o=>{ const ob=h("button","opt",o); ob.type="button";
+      ob.onclick=()=>{ if(o===tok.correct){ tok.done=true; tok.b.textContent=tok.ans; tok.b.classList.remove("cur"); tok.b.classList.add("done"); if(tok.ans===tok.orig) tok.b.classList.add("kept");
+          star(sid,tok.b); picker.hidden=true; const nx=tokens.find(x=>!x.done); if(nx) open(nx); else finish(); }
+        else { ob.classList.add("no"); ob.disabled=true; } };
+      picker.append(ob); }); }
+  function finish(){ const m=h("div","txdone",`<b>Готово!</b> Теперь прочитай весь текст вслух.`); box.append(m); }
+  box.append(wrap,picker);
+}
+
+function verbHelper(){
+  const fab=h("button","vfab","Verbs<small>50</small>"); fab.type="button"; fab.setAttribute("aria-label","Open the verb table");
+  const ov=h("div","vov"); ov.hidden=true;
+  const panel=h("div","vpanel"); const head=h("div","vhead",`<b>50 rebel verbs</b>`); const close=h("button","vclose","✕"); close.type="button"; close.setAttribute("aria-label","Close"); head.append(close);
+  const letters=[...new Set(VERBS.map(v=>v[0][0]))]; const lrow=h("div","vletters"); const grid=h("div","vtable");
+  const show=l=>{ grid.innerHTML=VERBS.filter(v=>!l||v[0][0]===l).map(v=>`<div><b>${v[0]}</b><span>${v[1]}</span><i>${v[2]}</i></div>`).join(""); lrow.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.l===(l||""))); };
+  [["","All"],...letters.map(l=>[l,l.toUpperCase()])].forEach(([l,t])=>{ const b=h("button",null,t); b.type="button"; b.dataset.l=l; b.onclick=()=>show(l); lrow.append(b); });
+  panel.append(head,h("p","hint","Нажми на букву, чтобы быстрее найти глагол."),lrow,grid); ov.append(panel);
+  fab.onclick=()=>{ ov.hidden=false; }; close.onclick=()=>{ ov.hidden=true; }; ov.onclick=e=>{ if(e.target===ov) ov.hidden=true; };
+  document.body.append(fab,ov); show("");
+}
+
+
+function rWyr(t,box){ t.items.forEach(([a,b])=>{ const row=h("div","q-row"); row.append(h("p","q","Would you rather…"));
+  const g=h("div","opts"); const p=h("p","hint",""); [a,b].forEach(x=>{ const btn=h("button","opt",x); btn.type="button";
+    btn.onclick=()=>{ g.querySelectorAll(".opt").forEach(z=>z.classList.remove("pick")); btn.classList.add("pick"); p.innerHTML=`Скажи: <i>I'd rather ${x} because…</i>`; }; g.append(btn); });
+  row.append(g,p); box.append(row); }); }
+
+const TICK=`<svg viewBox="0 0 120 130" class="tick" aria-hidden="true">
+ <line x1="30" y1="112" x2="20" y2="126" class="tk-leg"/><line x1="90" y1="112" x2="100" y2="126" class="tk-leg"/>
+ <circle cx="28" cy="22" r="14" class="tk-bell"/><circle cx="92" cy="22" r="14" class="tk-bell"/>
+ <circle cx="60" cy="68" r="50" class="tk-body"/><circle cx="60" cy="68" r="40" class="tk-face"/>
+ <circle cx="46" cy="58" r="6" class="tk-eye"/><circle cx="74" cy="58" r="6" class="tk-eye"/>
+ <circle cx="48" cy="56" r="2" fill="#fff"/><circle cx="76" cy="56" r="2" fill="#fff"/>
+ <path d="M44 80 Q60 94 76 80" class="tk-mouth"/>
+ <line x1="60" y1="68" x2="60" y2="38" class="tk-hand"/><line x1="60" y1="68" x2="80" y2="74" class="tk-hand"/>
+ <circle cx="36" cy="76" r="5" class="tk-cheek"/><circle cx="84" cy="76" r="5" class="tk-cheek"/></svg>`;
+
+let stars=0, totalStars=0; const stageGot={}, stageTot={};
+const app=$("#app");
+app.innerHTML=`<header class="top"><div><p class="eyebrow">English · 3 Tenses · 60 минут</p><h1>Time<br><span>Machine!</span></h1>
+ <p class="lead">Карточки по всем темам, а потом играем со временами: отправляем рассказы в прошлое и в «сейчас», ловим ошибки и сортируем подсказки. Только мышкой!</p></div>
+ <div class="star-box"><b id="stars">0</b><span>/ <i id="tstars">0</i> ★</span></div></header>
+ <nav id="tabs"></nav><main id="main"></main>
+ <p class="tutor">Для репетитора: подсказки для игры «Farm: yesterday and today» спрятаны во вкладке Let's Talk! Таблица неправильных глаголов — кнопка Verbs.</p>`;
+const tabs=$("#tabs"), main=$("#main"); const views={};
+
+function star(stage,btn){ stars++; stageGot[stage]=(stageGot[stage]||0)+1; $("#stars").textContent=stars;
+  burst(btn); if(stageGot[stage]===stageTot[stage]) done(stage); }
+function burst(el){ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return; const r=el.getBoundingClientRect();
+  for(let i=0;i<6;i++){ const s=h("span","spark","★"); s.style.left=(r.left+r.width/2)+"px"; s.style.top=(r.top+r.height/2)+"px";
+    s.style.setProperty("--dx",(Math.cos(i)*50)+"px"); s.style.setProperty("--dy",(Math.sin(i*1.7)*40-30)+"px"); document.body.append(s); setTimeout(()=>s.remove(),700); } }
+function done(stage){ const v=views[stage]; tabs.querySelector(`[data-id="${stage}"]`).classList.add("done");
+  const b=h("div","win",`<div class="medal">★</div><div><b>Stage complete!</b><span>Ты молодец! Переходи к следующему этапу.</span></div>`); v.append(b); }
+const say=(sid,txt)=>{ const s=views[sid]&&views[sid].querySelector(".bubble .say"); if(s){ s.innerHTML=txt; } };
+const PRAISE=["Great!","Super!","Well done!","Yes!","Cool!","Brilliant!","Perfect!"];
+
+function rChoice(t,box,sid){
+  t.items.forEach(it=>{ totalStars++; stageTot[sid]=(stageTot[sid]||0)+1;
+    const row=h("div","q-row"+(t.story?" story":"")); row.append(h("p","q",it.q.replace(/___/g,'<span class="gap">?</span>')));
+    const g=h("div","opts");
+    shuffle(it.o.map((o,j)=>[o,j])).forEach(([o,j])=>{ const b=h("button","opt",o); b.type="button";
+      b.onclick=()=>{ if(j===it.a){ b.classList.add("ok"); g.querySelectorAll("button").forEach(x=>x.disabled=true);
+          const parts=o.split(" … "); row.querySelectorAll(".gap").forEach((gp,i)=>{ gp.textContent=parts[i]||parts[0]; gp.classList.add("filled"); });
+          star(sid,b); say(sid,PRAISE[Math.floor(Math.random()*PRAISE.length)]); }
+        else { b.classList.add("no"); b.disabled=true; say(sid,"Oops! Try again!"); } };
+      g.append(b); });
+    row.append(g); box.append(row); });
+}
+function rOrder(t,box,sid){ totalStars++; stageTot[sid]=(stageTot[sid]||0)+1;
+  const pool=h("div","pool"), ans=h("div","answer"), msg=h("p","msg","");
+  const mk=w=>{ const b=h("button","word",w); b.type="button"; b.onclick=()=>{ if(box.classList.contains("solved")) return; (b.parentNode===pool?ans:pool).append(b); check(); }; return b; };
+  const check=()=>{ if(pool.children.length) { msg.textContent=""; return; }
+    const ok=[...ans.children].map(x=>x.textContent).join(" ")===t.words.join(" ");
+    if(ok){ box.classList.add("solved"); ans.classList.add("ok"); msg.textContent="Perfect question!"; star(sid,ans); }
+    else { ans.classList.add("bad"); msg.textContent="Not yet! Нажми на слово, чтобы вернуть его."; setTimeout(()=>ans.classList.remove("bad"),600); } };
+  shuffle(t.words).forEach(w=>pool.append(mk(w)));
+  box.append(pool,ans,msg);
+}
+function rTalk(t,box){ t.items.forEach(it=>{ const row=h("div","talk"); row.append(h("p","q",it.q));
+  const b=h("button","peek","Show an idea"); b.type="button"; const m=h("div","idea",it.m); m.hidden=true;
+  b.onclick=()=>{ m.hidden=!m.hidden; b.textContent=m.hidden?"Show an idea":"Hide"; }; row.append(b,m); box.append(row); }); }
+
+STAGES.forEach((s,si)=>{
+  const b=h("button","tab "+s.color,`<small>${si+1} · ${s.min} min</small>${s.title}`); b.type="button"; b.dataset.id=s.id;
+  b.onclick=()=>show(s.id,true); tabs.append(b);
+  const v=h("section","stage "+s.color); v.hidden=true; views[s.id]=v;
+  v.append(h("div","sticky",`<span class="sticky-tag">Правило</span><div class="rule">${s.tick}</div>`));
+  s.tasks.forEach((t,ti)=>{ const box=h("section","card");
+    box.append(h("h3",null,`<b>${String.fromCharCode(65+ti)}</b>${t.title}`)); if(t.hint) box.append(h("p","hint",t.hint));
+    if(t.type==="wyr") rWyr(t,box); else if(t.type==="flash") rFlash(t,box); else if(t.type==="transform") rTransform(t,box,s.id); else if(t.type==="choice") rChoice(t,box,s.id); else if(t.type==="order") rOrder(t,box,s.id); else if(t.type==="talk") rTalk(t,box); else box.insertAdjacentHTML("beforeend",t.html());
+    v.append(box); });
+  main.append(v);
+});
+$("#tstars").textContent=totalStars;
+function show(id,scroll){ Object.entries(views).forEach(([k,v])=>v.hidden=k!==id); tabs.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.id===id)); if(scroll) main.scrollIntoView({block:"start",behavior:"smooth"}); }
+let st=location.hash.slice(1); show(views[st]?st:"flip",false);
+
+verbHelper();
+</script>
+</body>
+</html>
